@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html lang="bg">
+<head>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/stats.min.js"></script>
+    <script src="../libs/dat.gui.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+    <title></title>
+</head>
+
+<body>
+<script>
+    vaxInit();
+
+    // Colours needn't be the same
+    var cube = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshNormalMaterial({wireframe: true}));
+
+    var gui = new dat.GUI();
+    gui.domElement.style.marginRight = 0;
+
+    scene.add(cube);
+
+    function animate() {
+    }
+</script>
+</body>
+</html>
+
+

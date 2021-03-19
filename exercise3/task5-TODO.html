@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/stats.min.js"></script>
+
+    <title>Vantablack Cant</title>
+</head>
+<body>
+<script>
+    vaxInit();
+
+    var cantSize = 1; // Values between 0-1 are optimal
+    const cubeSize = 5;
+    var cant = new THREE.Group();
+
+    var edgesGeometry = new THREE.CylinderGeometry(cantSize, cantSize, cubeSize, 16, 16);
+    var verticesGeometry = new THREE.SphereGeometry(cantSize, 16, 16);
+    var vantablack = new THREE.MeshLambertMaterial({
+        color: 'black'
+    });
+
+    // Vertical cant pieces
+    for (let i = 1; i <= 4; i++) {
+        let piece = createCantPiece();
+        piece.position.set(
+            i <= 2 ? -2 : 2,
+            0,
+            i % 2 === 0 ? -2 : 2,
+        ); // TODO update if needed
+        cant.add(piece);
+    }
+
+    // Horizontal cant pieces
+    for (let i = 1; i <= 8; i++) {
+        let piece = createCantPiece();
+        piece.rotation.z = Math.PI / 2;
+        piece.rotation.y = i <= 4 ? Math.PI / 2 : 0;
+        piece.position.set(
+            0,
+            i <= 4 ? 0 : cubeSize,
+            0
+        );
+        cant.add(piece);
+    }
+
+    scene.add(cant);
+    camera.position.set(20, 20, 20);
+    camera.lookAt(cant.position);
+
+
+    scene.add(new THREE.AxesHelper(10));
+
+    function animate() {
+        // scene.rotation.set(0, t, 0);
+        // cant.rotation.set(t, t / 2, t / 4);
+    }
+
+    function createCantPiece() {
+        let cantPiece = new THREE.Group();
+        let lowerVertex = new THREE.Mesh(verticesGeometry, vantablack);
+        let upperVertex = lowerVertex.clone();
+        upperVertex.position.y = cubeSize;
+
+        let edge = new THREE.Mesh(edgesGeometry, vantablack);
+        edge.position.y = cubeSize / 2;
+
+        cantPiece.add(lowerVertex, upperVertex, edge);
+        cantPiece.scale.set(cantSize, 1, cantSize);
+        return cantPiece;
+    }
+
+</script>
+</body>
+</html>

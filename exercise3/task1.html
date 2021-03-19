@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <title>Swiss flag</title>
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/stats.min.js"></script>
+</head>
+<body>
+<script>
+    vaxInit();
+    var flag = new THREE.Group();
+
+    var flagBack = new THREE.Mesh(new THREE.BoxGeometry(3, 2, 0.2), new THREE.MeshBasicMaterial({color: 'red'}));
+
+    var flagFront1 = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.5, 0.21), new THREE.MeshBasicMaterial({color: 'white'}));
+    var flagFront2 = flagFront1.clone();
+
+    flagFront2.rotation.set(0, 0, Math.PI / 2);
+    flagFront2.scale.x = 0.75;
+
+
+    flag.add(flagBack, flagFront1, flagFront2);
+    scene.add(flag);
+
+    camera.position.set(5, 5, 5);
+    camera.lookAt(flag.position);
+
+    function animate() {
+        flag.rotation.set(t, t / 2, t / 4);
+    }
+
+</script>
+</body>
+</html>

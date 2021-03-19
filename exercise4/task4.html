@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html lang="bg">
+<head>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/stats.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/tween.umd.js"></script>
+    <title>Falling bouncy balls</title>
+</head>
+
+<body>
+<script>
+    vaxInit();
+    const sphereGeom = new THREE.SphereGeometry(5, 16, 16);
+
+    for (let i = 1; i <= 100; i++) {
+        spawnFallingBall();
+    }
+
+    light2 = new THREE.PointLight();
+    light2.position.set(0, 150, -300);
+    scene.add(light2);
+
+    function animate() {
+        TWEEN.update();
+    }
+
+    function spawnFallingBall() {
+        let ball = new THREE.Mesh(sphereGeom, randomColourMaterial());
+        ball.position.set(50 - 100 * Math.random(), 10 + 10 * Math.random() * 3, 50 - 100 * Math.random());
+        scene.add(ball);
+
+        let finalPosition = new THREE.Vector3(ball.position.x, 0, ball.position.z);
+        new TWEEN.Tween(ball.position).to(finalPosition).easing(TWEEN.Easing.Bounce.Out)
+            .delay(Math.random() * 3000).start();
+    }
+
+    function randomColourMaterial() {
+        return new THREE.MeshLambertMaterial({color: Math.floor(Math.random() * 0xffffff)});
+    }
+</script>
+</body>
+</html>
+
+

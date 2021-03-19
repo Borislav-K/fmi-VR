@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/stats.min.js"></script>
+
+    <title>Randomized towers</title>
+</head>
+<body>
+<script>
+    vaxInit();
+    scene.background = new THREE.Color('pink');
+    scene.add(new THREE.AmbientLight('deeppink', 1.5));
+
+    var floor = new THREE.Mesh(new THREE.BoxGeometry(15, 1, 15), new THREE.MeshLambertMaterial({color: 'white'}));
+
+    scene.add(floor);
+
+    camera.position.set(0, 5, 20);
+    camera.lookAt(floor.position);
+
+    for (let i = 1; i <= 10; i++) {
+        buildTower(Math.random() * 15 - 7.5, Math.random() * 15 - 7.5, Math.random() * 10);
+    }
+
+    function animate() {
+        scene.rotation.y = t;
+    }
+
+    var cubeGeom = new THREE.BoxGeometry(1, 1, 1);
+
+    function buildTower(xPos, zPos, numberOfCubes) {
+        for (let i = 1; i <= numberOfCubes; i++) {
+            let cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({
+                color: new THREE.Color().setHSL(THREE.Math.randFloat(0, 1), 1, 0.7),
+                shininess: 100
+            }));
+            cube.position.set(xPos, i, zPos);
+            cube.rotation.set(0, randomAngle(), 0);
+            scene.add(cube);
+        }
+
+    }
+
+    function randomAngle() {
+        return Math.random() * Math.PI;
+    }
+</script>
+</body>
+</html>

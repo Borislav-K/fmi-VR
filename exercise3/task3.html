@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/stats.min.js"></script>
+
+    <title>Custom Pie Chart</title>
+</head>
+<body>
+<script>
+    vaxInit();
+
+    var pieChart = new THREE.Group();
+
+    var numbers = [10, 10, 10, 10, 10, 50, 1, 1, 1, 1, 1, 1, 10];
+    var sum = numbers.reduce((a, b) => a + b);
+    var angles = numbers.map(number => number * 2 * Math.PI / sum);
+
+    console.log(angles);
+    var nextStartAngle = 0;
+    angles.forEach(function (angle) {
+        pieChart.add(randomColorCylinder(nextStartAngle, angle));
+        nextStartAngle += angle;
+    });
+
+    scene.add(pieChart);
+
+    camera.position.set(0, 0, 3);
+    camera.lookAt(pieChart.position);
+
+    function animate() {
+        pieChart.rotation.set(t, t / 2, t / 5);
+    }
+
+    function randomColorCylinder(startAngle, size) {
+        let material = new THREE.MeshLambertMaterial({
+            color: new THREE.Color().setHex(0xffffff * Math.random())
+        });
+        let sector = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.5, 16, 16, false, 0, size), material);
+        sector.rotation.set(0, startAngle, 0);
+        return sector;
+    }
+</script>
+</body>
+</html>

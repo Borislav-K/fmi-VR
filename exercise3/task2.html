@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/stats.min.js"></script>
+
+    <title>Color circle</title>
+</head>
+<body>
+<script>
+    vaxInit();
+
+    var colorCircle = new THREE.Group();
+
+    var sphereGeom = new THREE.SphereGeometry(1, 16, 16);
+    var sphereMaterial = new THREE.MeshBasicMaterial({color: 'indigo'});
+
+    var centerSphere = new THREE.Mesh(sphereGeom, sphereMaterial);
+
+    var s = new THREE.Spherical(0, 0, 0);
+
+    ['red', 'orange', 'yellow', 'green', 'blue', 'violet'].forEach(function (color, index) {
+        let sphere = new THREE.Mesh(sphereGeom, new THREE.MeshBasicMaterial({color: color}));
+        s.set(2, index * Math.PI / 3, 0);
+        sphere.position.setFromSpherical(s);
+        colorCircle.add(sphere);
+    });
+
+    colorCircle.add(centerSphere);
+    scene.add(colorCircle);
+
+    camera.position.set(-6, 0, 0);
+    camera.lookAt(colorCircle.position);
+
+    function animate() {
+        colorCircle.rotation.set(-t, 0, 0);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+<html lang="bg">
+<head>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/stats.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/tween.umd.js"></script>
+    <title>Spheres rotation</title>
+</head>
+
+<body>
+<script>
+    vaxInit();
+    const sphereGeom = new THREE.SphereGeometry(1, 16, 16);
+
+    for (let i = 1; i <= 200; i++) {
+        let sphere = new THREE.Mesh(sphereGeom, new THREE.MeshLambertMaterial({color: Math.floor(Math.random() * 0xffffff)}));
+        sphere.position.set(Math.random() * 10 - 5, Math.random() * 10 - 5, Math.random() * 10 - 5);
+        scene.add(sphere);
+    }
+
+    var rotation = {angle: -2};
+    scene.rotation.y=rotation.angle;
+
+    var rotateLeft = new TWEEN.Tween(rotation).to({angle: 2}, 2500).easing(TWEEN.Easing.Cubic.InOut);
+    var rotateRight = new TWEEN.Tween(rotation).to({angle: -2}, 2500).easing(TWEEN.Easing.Cubic.InOut);
+
+    rotateLeft.chain(rotateRight);
+    rotateRight.chain(rotateLeft);
+    rotateLeft.start();
+
+    camera.position.set(0, 0, 30);
+
+    light2 = new THREE.PointLight();
+    light2.position.set(0, 150, -300);
+    scene.add(light2);
+
+    function animate() {
+        TWEEN.update();
+        scene.rotation.y = rotation.angle;
+    }
+</script>
+</body>
+</html>
+
+
