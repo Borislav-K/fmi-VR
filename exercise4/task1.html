@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html lang="bg">
+<head>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/stats.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+    <title>Топче обикаля ръбове на куб</title>
+</head>
+
+<body>
+<script>
+    vaxInit();
+    var cube = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshNormalMaterial({
+        side: THREE.DoubleSide,
+        transparent: true,
+        depthWrite: false,
+        opacity: 0.4
+    }));
+
+    var ball = new THREE.Mesh(new THREE.SphereGeometry(0.2, 32, 32), new THREE.MeshPhongMaterial({
+        color: new THREE.Color(0xBD7A0D)
+    }));
+
+    scene.add(cube, ball);
+    ball.position.set(-1, -1, -1);
+
+    camera.position.set(3, 3, 3);
+    camera.lookAt(cube.position);
+
+    var lastUsedAxis, lastVertex;
+    var targetVertex = ball.position;
+
+    var k = 0;
+
+    function animate() {
+        k += 0.03;
+        if (destinationReached()) {
+            k = 0.03;
+            lastVertex = targetVertex.clone();
+            targetVertex = nextVertex();
+        }
+        ball.position.lerpVectors(lastVertex, targetVertex, Math.min(1, k));
+    }
+
+
+    function nextVertex() {
+        // Не трябва да се връща назад => Не трябва да върви по същата ос 2 поредни пъти
+        let nextAxis = ["X", "Y", "Z"].filter(function (axis) {
+            return axis !== lastUsedAxis
+        })[Math.round(Math.random())];
+
+        lastUsedAxis = nextAxis;
+        switch (nextAxis) {
+            case "X":
+                return new THREE.Vector3(ball.position.x === 1 ? -1 : 1, ball.position.y, ball.position.z);
+            case "Y":
+                return new THREE.Vector3(ball.position.x, ball.position.y === 1 ? -1 : 1, ball.position.z);
+            case "Z":
+                return new THREE.Vector3(ball.position.x, ball.position.y, ball.position.z === 1 ? -1 : 1);
+        }
+    }
+
+    function destinationReached() {
+        return Math.abs(ball.position.x) === 1 &&
+            Math.abs(ball.position.y) === 1 &&
+            Math.abs(ball.position.z) === 1;
+    }
+
+</script>
+</body>
+</html>
+
+
