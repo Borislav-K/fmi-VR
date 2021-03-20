@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+
+<html lang="bg">
+<head>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/stats.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/tween.umd.js"></script>
+    <script src="../libs/scene.js"></script>
+    <title>Shy pillars</title>
+</head>
+
+<body>
+<script>
+    sceneInit();
+    sceneObjects();
+
+    const radius = 75;
+    const pillarsCount = 8;
+    const step = 2 * Math.PI / pillarsCount; // the length of the arc between pillars
+    const pillarHeight = 40;
+    const material = new THREE.MeshPhongMaterial({color: 'lightgreen'});
+
+    var pillars = spawnPillars();
+    scene.add(...pillars);
+
+    let nextPillarToShyAway = 0;
+
+    object.position.setFromSphericalCoords(radius, Math.PI / 2, 0);
+
+    function animate() {
+        let currentAngle = t % (2 * Math.PI); // The cube makes a circle every 2*pi seconds
+        object.position.setFromSphericalCoords(radius, Math.PI / 2, currentAngle);
+        object.position.y = pillarHeight;
+        scene.rotation.set(0, t / 2, 0);
+
+        // Every 2*pi/step seconds, a pillar should shy away
+        if (currentAngle % step >= step * 0.75) {
+            let index = Math.floor(currentAngle / step);
+            if (index === nextPillarToShyAway) { // this check prevents the animation from starting in multiple consecutive frames
+                pillars[index].shyAnimation.start();
+                nextPillarToShyAway = (nextPillarToShyAway + 1) % pillarsCount;
+            }
+        }
+
+        TWEEN.update();
+    }
+
+    function spawnPillars() {
+        let pillars = [];
+        for (let i = 1; i <= pillarsCount; i++) {
+            let pos = new THREE.Vector3().setFromSphericalCoords(radius, Math.PI / 2, i * step);
+            pos.y = pillarHeight;
+            let nextPillar = pillar(pos, material);
+
+            nextPillar.shyAnimation = new TWEEN.Tween(nextPillar.scale).to({y: 0.2}, 50)
+                .chain(new TWEEN.Tween(nextPillar.scale).to({y: 1}, 1500));
+            pillars.push(nextPillar);
+        }
+        return pillars;
+    }
+
+</script>
+</body>
+</html>
+
+

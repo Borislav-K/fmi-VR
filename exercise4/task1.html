@@ -30,7 +30,7 @@
     scene.add(cube, ball);
     ball.position.set(-1, -1, -1);
 
-    camera.position.set(3, 3, 3);
+    camera.position.set(2.5, 2.5, 2.5);
     camera.lookAt(cube.position);
 
     var lastUsedAxis, lastVertex;
@@ -39,6 +39,8 @@
     var k = 0;
 
     function animate() {
+        scene.rotation.set(t / 4, t / 8, t / 12);
+
         k += 0.03;
         if (destinationReached()) {
             k = 0.03;
@@ -47,7 +49,6 @@
         }
         ball.position.lerpVectors(lastVertex, targetVertex, Math.min(1, k));
     }
-
 
     function nextVertex() {
         // Не трябва да се връща назад => Не трябва да върви по същата ос 2 поредни пъти
