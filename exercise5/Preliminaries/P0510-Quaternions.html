@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>P0510: Кватерниони</title>
+		<meta charset="utf-8">
+		
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		
+		<script src="three.min.js"></script>
+		<script src="stats.min.js"></script>
+		<script src="dat.gui.min.js"></script>
+		<script src="WebGL.js"></script>
+		<script src="vax.js"></script>
+		<script src="scene.js"></script>
+	</head>
+	
+	<body>
+		<script>
+			sceneInit();
+			sceneObjects();
+			
+			// интерактивно контролиране на ъглите
+			var gui = new dat.GUI();
+			gui.domElement.style.marginRight = 0;
+			var angles = {
+				alpha: 0,
+				beta: 0,
+				gamma: 0,
+				autoAlpha: false
+			};
+			gui.add( angles, 'gamma', -360, 360 ).name('Хоризонтално');
+			gui.add( angles, 'beta', -90, 90 ).name('Вертикално');
+			gui.add( angles, 'alpha', -360, 360 ).name('Около оста');
+			gui.add( angles, 'autoAlpha' ).name('Автоматично');
+		
+			// позиция
+			var p = new THREE.Vector3(0,30,0);
+			
+			// пилон
+			scene.add( pillar(p,ground.material) );
+			
+			// връзка до пилона
+			var wire = new THREE.Mesh(
+				new THREE.CylinderBufferGeometry( 1, 1, 50 ),
+				ground.material
+			);
+			wire.position.y = 50;
+			scene.add( wire );
+			
+			// перка (преизползва куба object, създаден по подразбиране)
+			object.position.y = 75;
+			object.scale.set( 5, 0.2, 1 );
+			
+	
+			var q = new THREE.Quaternion();
+			
+			function animate()
+			{
+				// въртене с квартенион
+				// group.quaternion.set(...,...,...,...);
+					
+				scene.rotation.y = t/10;
+			}
+		</script>
+	</body>
+</html>
+
+

@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>P0504: Клякащ стол</title>
+		<meta charset="utf-8">
+		
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		
+		<script src="three.min.js"></script>
+		<script src="stats.min.js"></script>
+		<script src="WebGL.js"></script>
+		<script src="vax.js"></script>
+		<script src="scene.js"></script>
+	</head>
+	
+	<body>
+		<script>
+			sceneInit();
+			sceneObjects();
+			scene.remove( object );
+
+			// седалка
+			var seat = robotElement( 60, 5, 60 );
+			seat.position.y = 20;
+			scene.add( seat );
+	
+			// първи крак
+			// ...
+			
+			// втори крак
+			// ...
+			
+			
+			function animate()
+			{
+				// клякане
+				// ...
+				
+				scene.rotation.y = t/10;
+			}
+		</script>
+	</body>
+</html>
+
+

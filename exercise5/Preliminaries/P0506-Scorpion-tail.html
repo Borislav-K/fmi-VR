@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>P0506: Опашка на скорпион</title>
+		<meta charset="utf-8">
+		
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		
+		<script src="three.min.js"></script>
+		<script src="stats.min.js"></script>
+		<script src="WebGL.js"></script>
+		<script src="vax.js"></script>
+		<script src="scene.js"></script>
+	</head>
+	
+	<body>
+		<script>
+			sceneInit();
+			sceneObjects();
+			scene.remove( object );
+
+			// първи сегмент
+			var segment = robotElement( 2, 12, 16 );
+				segment.rotation.z = -Math.PI/2;
+				scene.add( segment );
+	
+			// още n-1 сегмента
+			// ...
+			
+			function animate()
+			{
+				// навиване на спирала
+				// ...
+
+				scene.rotation.y = t/10;
+			}
+		</script>
+	</body>
+</html>
+
+
