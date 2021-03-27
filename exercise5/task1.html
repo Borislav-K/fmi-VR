@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <title>P0501: Планета с дървета</title>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/stats.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+</head>
+
+<body>
+<script>
+    vaxInit();
+    var stemGeom = new THREE.ConeGeometry(3, 10);
+    var crownGeom = new THREE.IcosahedronBufferGeometry(2);
+    var stemMaterial = new THREE.MeshLambertMaterial({color: 'brown'});
+    var crownMaterial = new THREE.MeshLambertMaterial({color: 'green'});
+
+    // планета
+    var planet = new THREE.Mesh(
+        new THREE.IcosahedronBufferGeometry(40, 4),
+        new THREE.MeshLambertMaterial({color: 'brown'})
+    );
+    scene.add(planet);
+
+    // дърво
+    function spawnTree() {
+        var stem = new THREE.Mesh(stemGeom, stemMaterial);
+        var crown = new THREE.Mesh(crownGeom, crownMaterial);
+        stem.translateY(40);
+        crown.translateY(45);
+
+        var tree = new THREE.Group();
+        tree.rotation.set(2 * Math.PI * Math.random(), 0, 2 * Math.PI * Math.random());
+        tree.add(stem, crown);
+        planet.add(tree);
+    }
+
+    // гора
+    for (let i = 1; i <= 100; i++) {
+        spawnTree();
+    }
+
+    function animate() {
+        planet.rotation.set(t, t / 2, t / 4);
+    }
+</script>
+</body>
+</html>
+
+
