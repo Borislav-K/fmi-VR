@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/stats.min.js"></script>
+
+    <title>Vantablack Cant</title>
+</head>
+<body>
+<script>
+    vaxInit();
+
+    const cantSize = 2;
+    const cubeDimensions = 30;
+
+    var cubeGeom = new THREE.BoxGeometry(cubeDimensions, cubeDimensions, cubeDimensions);
+    var cubeMaterial = new THREE.MeshPhongMaterial({
+        color: 'sandybrown',
+        shininess: 150,
+        emissive: 'sandybrown',
+        emissiveIntensity: 0.5
+    });
+
+    var cantMaterial = new THREE.MeshBasicMaterial({color: 'black'});
+    var vertexGeom = new THREE.SphereGeometry(cantSize * 0.95, 24, 24);
+    var edgeGeom = new THREE.CylinderGeometry(cantSize, cantSize, cubeDimensions);
+
+    function createCant() {
+        scene.add(new THREE.Mesh(cubeGeom, cubeMaterial)); // cube
+        var cantWall = new THREE.Group();
+        //vertices
+        for (let i = 0; i < 8; i++) {
+            let vertex = new THREE.Mesh(vertexGeom, cantMaterial);
+            vertex.position.set(
+                i % 2 === 0 ? cubeDimensions / 2 : -cubeDimensions / 2,
+                i % 4 < 2 ? cubeDimensions / 2 : -cubeDimensions / 2,
+                i < 4 ? cubeDimensions / 2 : -cubeDimensions / 2,
+            );
+            scene.add(vertex);
+        }
+
+        // vertical edges
+        let edge00 = new THREE.Mesh(edgeGeom, cantMaterial);
+        edge00.position.set(-cubeDimensions / 2, 0, cubeDimensions / 2);
+        let edge10 = edge00.clone();
+        edge10.translateX(cubeDimensions);
+        let edge01 = edge10.clone();
+        edge01.translateZ(-cubeDimensions);
+        let edge11 = edge01.clone();
+        edge11.translateX(-cubeDimensions);
+
+        scene.add(edge00, edge10, edge01, edge11);
+
+        // upper horizontal edges
+        let horizontalEdge00 = new THREE.Mesh(edgeGeom, cantMaterial);
+        horizontalEdge00.rotation.x = Math.PI / 2;
+        horizontalEdge00.translateX(-cubeDimensions / 2);
+        let horizontalEdge01 = horizontalEdge00.clone();
+        horizontalEdge01.translateX(cubeDimensions);
+        let horizontalEdge10 = horizontalEdge00.clone();
+        horizontalEdge10.rotateZ(Math.PI / 2);
+        horizontalEdge10.position.set(0, 0, -cubeDimensions / 2);
+        let horizontalEdge11 = horizontalEdge10.clone();
+        horizontalEdge11.translateX(cubeDimensions);
+
+        var upperHorizontalCant = new THREE.Group();
+        upperHorizontalCant.translateY(cubeDimensions / 2);
+        upperHorizontalCant.add(horizontalEdge00, horizontalEdge01, horizontalEdge10, horizontalEdge11);
+
+        var lowerHorizontalCant = upperHorizontalCant.clone();
+        lowerHorizontalCant.translateY(-cubeDimensions);
+
+        scene.add(upperHorizontalCant, lowerHorizontalCant);
+
+        return cantWall;
+    }
+
+    createCant();
+    // camera.position.set(20, 20, 20);
+    // camera.lookAt(new THREE.Object3D().position);
+
+    function animate() {
+        scene.rotation.set(t, t / 2, t / 4);
+    }
+
+</script>
+</body>
+</html>
