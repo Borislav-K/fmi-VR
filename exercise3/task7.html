@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/stats.min.js"></script>
+
+    <title>Lightcube</title>
+</head>
+<body>
+<script>
+    vaxInit();
+
+    let cubeDimensions = 8;
+
+    scene.remove(light);
+    scene.background = new THREE.Color('black');
+
+    var ground = new THREE.Mesh(new THREE.BoxGeometry(150, 1, 150), new THREE.MeshPhongMaterial({
+        color: 'black',
+        shininess: 100
+    }));
+    ground.translateY(-cubeDimensions * 1.5);
+
+    var lightCube = new THREE.Group();
+    lightCube.add(new THREE.Mesh(new THREE.BoxGeometry(cubeDimensions, cubeDimensions, cubeDimensions),
+        new THREE.MeshPhongMaterial({
+            color: 'white',
+            shininess: 30,
+        })));
+
+    for (let i = 1; i <= 8; i++) {
+        light = new THREE.PointLight(new THREE.Color(Math.random() * 0xffffff), 1.2, cubeDimensions * 5);
+        light.position.set(
+            i % 2 === 0 ? cubeDimensions / 1.5 : -cubeDimensions / 1.5,
+            i % 4 < 2 ? cubeDimensions / 1.5 : -cubeDimensions / 1.5,
+            i <= 4 ? cubeDimensions / 1.5 : -cubeDimensions / 1.5,
+        );
+        lightCube.add(light);
+    }
+
+
+    scene.add(ground, lightCube);
+    camera.position.set(20, 40, 40);
+    camera.lookAt(ground.position);
+
+    function animate() {
+        lightCube.rotation.set(t, t / 4, t / 8);
+    }
+</script>
+</body>
+</html>
