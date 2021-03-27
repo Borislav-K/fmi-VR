@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/stats.min.js"></script>
+
+    <title>Blazing Sun</title>
+</head>
+<body>
+<script>
+    vaxInit();
+    scene.background = new THREE.Color('black');
+
+    var n = 500;
+    var sunGeom = new THREE.IcosahedronGeometry(40, 1);
+
+    var sunFragments = [];
+    for (let i = 1; i <= n; i++) {
+        let sunFragment = new THREE.Mesh(sunGeom, new THREE.MeshLambertMaterial({
+            color: new THREE.Color().setHSL(THREE.Math.randFloat(0.04, 0.12), 1.5, 0.5),
+            emissive: 'orange',
+            emissiveIntensity: 0.5,
+            transparent: true,
+            opacity: 1 - i / (n + 2) // bigger index -> more transparent
+        }));
+        sunFragment.scale.set(1 + i / n / 25, 1 + i / n / 25, 1 + i / n / 25); // More transparent -> bigger
+        sunFragments.push(sunFragment);
+        scene.add(sunFragment);
+    }
+
+    function animate() {
+        sunFragments.forEach(function (s, i) {
+            s.rotation.set(Math.cos(t / 3 + i) / 2, Math.sin(t / 4 - i) / 4, Math.sin(t / 5 + i * 2) / 2);
+            scene.rotation.set(0, t / 10, 0);
+        })
+    }
+
+</script>
+</body>
+</html>
