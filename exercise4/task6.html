@@ -13,7 +13,7 @@
     <script src="../libs/vax.js"></script>
     <script src="../libs/tween.umd.js"></script>
     <script src="../libs/scene.js"></script>
-    <title>Shy pillars</title>
+    <title>Coefficient of linear combination shown in GUI</title>
 </head>
 
 <body>
@@ -23,18 +23,27 @@
 
     const material = new THREE.MeshPhongMaterial({color: 'lightgreen'});
 
-    var pillar1 = pillar({x: 20, y: 40, z: 0}, material);
-    scene.add(pillar1);
+    var pos1 = new THREE.Vector3(-60, 40, 0);
+    var pos2 = new THREE.Vector3(80, 30, 20);
+
+    var pillar1 = pillar(pos1, material);
+
+    var pillar2 = pillar(pos2, material);
+    scene.add(pillar1, pillar2);
 
     var gui = new dat.GUI();
     gui.domElement.style.marginRight = 0;
 
     var data = {
-        colour: 0xffffff
-    }
+        k: 0.5,
+    };
+
+    var gui_k = gui.add(data, 'k', 0, 1);
 
     function animate() {
-        TWEEN.update();
+        data.k = Math.pow(0.5 + 0.5*Math.sin(2*t), 2);
+        object.position.lerpVectors(pos1, pos2, data.k);
+        gui_k.updateDisplay();
     }
 </script>
 </body>
