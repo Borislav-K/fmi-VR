@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <title>S0601: Кула от кубчета</title>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/stats.min.js"></script>
+    <script src="physi.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+</head>
+
+<body>
+<script>
+    vaxInit();
+
+    // светлина и сенки
+    renderer.shadowMap.enabled = true;
+    light.shadow.mapSize = new THREE.Vector2(1024 * 2, 1024 * 2);
+    light.position.set(-150, 300, -50);
+    light.intensity = 0.8;
+
+    light = light.clone();
+    light.intensity = 0.4;
+    light.castShadow = true;
+    scene.add(light);
+
+    scene.add(new THREE.AmbientLight('yellow', 0.2));
+
+    camera.position.set(0, 50, 240);
+    camera.lookAt(new THREE.Vector3(0, 80, 0));
+
+
+    // земя
+    var groundGeometry = new THREE.BoxBufferGeometry(300, 4, 300),
+        groundMaterial = Physijs.createMaterial(new THREE.MeshPhongMaterial({color: 'lightgreen'}), 1, 0);
+    var ground = new Physijs.BoxMesh(groundGeometry, groundMaterial, 0);
+    ground.position.set(0, -10, 0);
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // кубче
+    var cubeGeometry = new THREE.BoxBufferGeometry(20, 20, 20),
+        cubeMaterial = Physijs.createMaterial(new THREE.MeshPhongMaterial({color: 'hotpink'}), 1, 0);
+
+    var lastCubeSpawnedAt = 0;
+    var totalCubesSpawned = 0;
+
+    function spawnCube(height) {
+        if (t - lastCubeSpawnedAt < 0.4) {
+            return;
+        }
+        cube = new Physijs.BoxMesh(cubeGeometry, cubeMaterial);
+        cube.position.set(-5 + 10 * Math.random(), height ? height : 300, -5 + 10 * Math.random());
+        cube.receiveShadow = true;
+        cube.castShadow = true;
+        cube.canFall = true;
+        scene.add(cube);
+        totalCubesSpawned && cube.addEventListener('collision', function (other) {
+            if (this.canFall && other === ground) {
+                spawnCube();
+                this.canFall = false;
+            }
+        })
+        totalCubesSpawned++;
+        lastCubeSpawnedAt = t;
+    }
+
+    for (let i = 1; i <= 10; i++) {
+        setTimeout(function () {
+            spawnCube(i * 25);
+        }, 500 * i);
+    }
+
+    function animate() {
+        scene.simulate(1 / 10);
+
+        scene.rotation.y = t / 10;
+    }
+</script>
+</body>
+</html>
+
+

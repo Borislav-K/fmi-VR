@@ -1,10 +1,11 @@
 /**
  * FMI VR/AR/XR Library
- * 2020-05-09
- * v 0.002
+ * 2020-05-25
+ * v 0.005
  *
  * vaxInit()	инициализира на моно режим и поддържа
- *				анимационен цикъл с animate()
+ *				анимационен цикъл с animate() -- проверява
+ *				за наличието на Physijs
  *
  * animate()	потребителска функция, която генерира нов
  *				кадър; извиква се автоматично
@@ -14,6 +15,12 @@
  *
  * pillar(center, material) създава пилон с връх center,
  *              материал и стигащ до y=0
+ *
+ * robotMaterial - подразбиращ се материал за елемент на робот
+ *
+ * robotElement( sizeX, sizeY, sizeZ, parent ) създава елемент
+ * 				на робот, свързан към ротителски елемент
+ * 
  */
 
 var renderer, scene, camera, light, stats, clock, t, animate;
@@ -30,8 +37,11 @@ function vaxInit()
 	
 	stats = new Stats();
 	document.body.appendChild( stats.dom );
-	
-	scene = new THREE.Scene();
+
+	if( typeof Physijs !== 'undefined' )
+		scene = new Physijs.Scene();
+	else
+		scene = new THREE.Scene();
 	scene.background = new THREE.Color('white');
 
 	clock = new THREE.Clock(true);
@@ -106,4 +116,45 @@ function pillar(center, material)
 	pillar.position.copy( center );	
 	
 	return pillar;
+}
+
+
+
+// елемент на робот
+var robotMaterial = new THREE.MeshPhongMaterial( {color: 'tomato', shininess: 100} );
+	
+// клас за елемент на робот
+function robotElement( sizeX, sizeY, sizeZ, parent )
+{
+	var robotGeometry = new THREE.BoxBufferGeometry( sizeX, sizeY, sizeZ );
+	robotGeometry.translate( 0, sizeY/2, 0 );
+	
+	var object = new THREE.Mesh( robotGeometry, robotMaterial );
+	object.castShadow = true;
+		
+	// ако има родител, регистрира елемента като негов подобект
+	if( parent )
+	{
+		object.position.set( 0, parent.geometry.parameters.height, 0 );
+		parent.add( object );
+	}
+	
+	return object;
+}
+	
+// клас за елемент на робот
+function robotElementShape( geometry, length, parent )
+{
+	var object = new THREE.Mesh( geometry, robotMaterial );
+	object.length = length;
+	object.castShadow = true;
+		
+	// ако има родител, регистрира елемента като негов подобект
+	if( parent )
+	{
+		object.position.set( 0, parent.length, 0 );
+		parent.add( object );
+	}
+	
+	return object;
 }
