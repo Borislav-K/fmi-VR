@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>S0604: Обсебени кубчета</title>
+		<meta charset="utf-8">
+		
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		
+		<script src="three.min.js"></script>
+		<script src="stats.min.js"></script>
+		<script src="physi.js"></script>
+		<script src="WebGL.js"></script>
+		<script src="vax.js"></script>
+	</head>
+	
+	<body>
+		<script>
+			vaxInit();
+
+			// светлина и сенки
+			renderer.shadowMap.enabled = true;
+			light.shadow.mapSize = new THREE.Vector2( 1024*2, 1024*2 );
+			light.position.set(-150,300,-50);
+			light.intensity = 0.8;
+			
+			light = light.clone();
+			light.intensity = 0.4;
+			light.castShadow = true;
+			scene.add( light );
+
+			scene.add( new THREE.AmbientLight( 'yellow', 0.2 ) );
+			
+			camera.position.set(0,20,350);
+			camera.lookAt(new THREE.Vector3(0,0,0));
+			
+			
+			// прозрачен куб
+			var geometry = new THREE.BoxBufferGeometry( 200, 200, 200 ),
+				material = new THREE.MeshNormalMaterial({transparent:true, opacity:0.3, side:THREE.DoubleSide, depthTest: false}),
+				cube = new THREE.Mesh( geometry, material );
+				scene.add( cube );
+			
+			// кубчета
+			var geometry = new THREE.BoxBufferGeometry( 30, 30, 30 ),
+				material = new THREE.MeshNormalMaterial();
+				
+			var cubes = [];
+			for( var i=0; i<10; i++ )
+			{
+				var cube = new THREE.Mesh( geometry, material );
+					cube.position.set( THREE.Math.randFloat(-60,60), THREE.Math.randFloat(-60,60), THREE.Math.randFloat(-60,60) );
+					cube.receiveShadow = true;
+					cube.castShadow = true;
+				cubes.push( cube );
+				scene.add( cube );
+			}
+
+			function animate()
+			{
+				scene.rotation.y = t/10;
+			}
+		</script>
+	</body>
+</html>
+
+

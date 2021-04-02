@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>S0609: Лабиринт</title>
+		<meta charset="utf-8">
+		
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		
+		<script src="three.min.js"></script>
+		<script src="stats.min.js"></script>
+		<script src="physi.js"></script>
+		<script src="WebGL.js"></script>
+		<script src="vax.js"></script>
+		<script src="scene.js"></script>
+	</head>
+	
+	<body>
+		<script>
+			sceneInit();
+
+			// земя
+			ground = new THREE.Mesh(
+				new THREE.BoxBufferGeometry(200,4,200),
+				new THREE.MeshPhongMaterial()
+			);
+			ground.position.set( 0, -2, 0 );
+			ground.receiveShadow = true;
+			
+			// капак
+			material = new THREE.MeshPhongMaterial({color:'cornflowerblue',transparent:true,opacity:0.3,depthWrite:false});
+			cover = new THREE.Mesh(
+				new THREE.BoxBufferGeometry(200,1,200),
+				material,
+				0
+			);
+			cover.position.set( 0, 24, 0 );
+			ground.add( cover );
+			
+			// преграда ляво-дясно
+			function barX( x0, x1, z )
+			{
+				var bar = new THREE.Mesh(
+					new THREE.BoxBufferGeometry(x1-x0,24,2),
+					material
+				);
+				bar.position.set( (x1+x0)/2, 12, z );
+				ground.add( bar );
+			}
+			
+			// преграда напред-назад
+			function barZ( x, z0, z1 )
+			{
+				var bar = new THREE.Mesh(
+					new THREE.BoxBufferGeometry(2,24,z1-z0),
+					material
+				);
+				bar.position.set( x, 12, (z1+z0)/2 );
+				ground.add( bar );
+			}
+			
+			// външни стени
+			barX( -100, 100, -100 );
+			barX( -100, 100, +100 );
+			barZ( -100, -100, 100 );
+			barZ( 100, -100, 100 );
+			
+			scene.add( ground );
+
+			var geometry = new THREE.SphereBufferGeometry( 10, 32, 16 );
+			
+			// топка
+			material = new THREE.MeshPhongMaterial({color:'crimson', shininess:50});
+			ball = new THREE.Mesh( geometry, material );
+				ball.position.set( 0, 10, 0 );
+				ball.castShadow = true;
+			scene.add( ball );
+			
+			function animate()
+			{
+				ground.rotation.set( Math.sin(t)/5, 0, Math.cos(t)/5 );
+			}
+		</script>
+	</body>
+</html>
+
+

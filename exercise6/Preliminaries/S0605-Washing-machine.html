@@ -1,0 +1,83 @@
+﻿<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>S0605: Пералня</title>
+		<meta charset="utf-8">
+		
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		
+		<script src="three.min.js"></script>
+		<script src="stats.min.js"></script>
+		<script src="physi.js"></script>
+		<script src="WebGL.js"></script>
+		<script src="vax.js"></script>
+		<script src="scene.js"></script>
+	</head>
+	
+	<body>
+		<script>
+			vaxInit();
+
+			// по-добра позиция на камерата
+			camera.position.set(0,80,350);
+			camera.lookAt(new THREE.Vector3(0,0,0));
+			
+			var material = new THREE.MeshNormalMaterial({transparent:true, opacity:0.2});
+			
+			// долна основа
+			var geometry = new THREE.CylinderGeometry( 150, 150, 2, 32 ),
+				ground = new THREE.Mesh( geometry, material );
+				ground.position.set( 0, -100, 0 );
+			scene.add( ground );
+				
+			// горна основа
+			var ground2 = new THREE.Mesh( geometry, material );
+				ground2.position.set( 0, 200, 0 );
+			ground.add( ground2 );
+				
+			// долна преграда
+			var geometry = new THREE.BoxGeometry( 300, 5, 2 ),
+				bar = new THREE.Mesh( geometry, material );
+				bar.position.set( 0, 3, 0 );
+			ground.add( bar );
+			var bar = new THREE.Mesh( geometry, material );
+				bar.position.set( 0, 3, 0 );
+				bar.rotation.y = Math.PI/2;
+			ground.add( bar );
+				
+			// ограничители
+			geometry = new THREE.BoxBufferGeometry( 30, 200, 3 );
+			for( var i=0; i<20; i++)
+			{
+				var angle = i/20*2*Math.PI;
+				var barrier = new THREE.Mesh( geometry, material );
+				barrier.position.set( 140*Math.cos(angle), 100,  140*Math.sin(angle) );
+				barrier.rotation.set( 0, -angle+Math.PI/2, 0 );
+				ground.add( barrier );
+			}
+				
+			scene.add( ground );
+			
+			var geometry = new THREE.SphereBufferGeometry( 12, 24, 12 );
+				
+			for( var i=0; i<20; i++ )
+			{
+				var angle = i/20*2*Math.PI;
+				
+				var material = new THREE.MeshPhongMaterial({color:'cornflowerblue', shininess:100});
+				var ball = new THREE.Mesh( geometry, material );
+					ball.position.set( 110*Math.cos(angle), -90, 110*Math.sin(angle) );
+				if( ball.position.x<0 )	material.color = new THREE.Color('crimson');
+				scene.add( ball );
+			}
+			
+			function animate()
+			{
+				ground.rotation.y = t;
+			}
+		</script>
+	</body>
+</html>
+
+
