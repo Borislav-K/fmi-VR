@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>2 зарчета</title>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/stats.min.js"></script>
+    <script src="physi.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/dat.gui.min.js"></script>
+</head>
+
+<body>
+<script>
+    vaxInit();
+    scene.background = new THREE.Color(0x9301FA);
+    scene.add(new THREE.AmbientLight(0xff0000, 0.4));
+
+    const boxWidth = 450,
+        boxHeight = 250,
+        diceSize = boxWidth / 8,
+        pointSize = boxWidth / 60;
+
+    light.position.set(0, boxHeight * 1.6, 0);
+
+    // Dice Box
+    var boxGeom = new THREE.PlaneGeometry(boxWidth, boxWidth, 32, 32);
+    boxGeom.vertices.forEach(function (vertex) {
+        if (Math.abs(vertex.x) === boxWidth / 2 || Math.abs(vertex.y) === boxWidth / 2) {
+            vertex.z = boxHeight;
+        }
+    })
+    boxGeom.computeVertexNormals();
+    var boxMaterial = Physijs.createMaterial(new THREE.MeshLambertMaterial({color: 0x949122, side: THREE.DoubleSide}));
+    var diceBox = new Physijs.HeightfieldMesh(boxGeom, boxMaterial, 0);
+    diceBox.rotateX(-Math.PI / 2);
+    scene.add(diceBox);
+
+    // Dices
+    throw2Dices();
+
+    camera.position.set(boxWidth, boxHeight * 2.5, boxWidth / 4);
+    camera.lookAt(diceBox.position);
+
+    var gui = new dat.GUI();
+    gui.__closeButton.style.visibility = 'hidden';
+    gui.add({onClick: throw2Dices}, 'onClick').name('Хвърли зарчета');
+
+    function animate() {
+        scene.simulate(1 / 10);
+        light.power = 20 + 10 * Math.sin(5 * t);
+        scene.rotation.y = t;
+    }
+
+    function throw2Dices() {
+        scene.children
+            .filter(child => child instanceof Physijs.BoxMesh)
+            .forEach(dice => scene.remove(dice));
+        throwDice(0xE0131C, boxWidth / 2, boxHeight * 1.5, boxWidth / 2,
+            new THREE.Vector3(THREE.Math.randInt(-600, -500), THREE.Math.randInt(-200, 50), THREE.Math.randInt(-600, -500)));
+        throwDice(0x3FA6E0, -boxWidth / 2, boxHeight * 1.5, -boxWidth / 2,
+            new THREE.Vector3(600, THREE.Math.randInt(-200, 50), 600));
+    }
+
+    function throwDice(colour, x, y, z, force) {
+        var dice = createDice(colour);
+        dice.position.set(x, y, z);
+        scene.add(dice);
+        dice.applyCentralForce(force);
+        dice.setAngularVelocity(new THREE.Vector3(THREE.Math.randInt(0, 3), THREE.Math.randInt(0, 1), THREE.Math.randInt(0, 5)));
+    }
+
+
+    function createDice(colour) {
+        var dice = new Physijs.BoxMesh(new THREE.BoxGeometry(diceSize, diceSize, diceSize),
+            Physijs.createMaterial(new THREE.MeshPhongMaterial({
+                color: colour,
+            })), 1);
+        // Side with 1 point
+        var point = new THREE.Mesh(new THREE.CircleGeometry(pointSize, 16), new THREE.MeshBasicMaterial({color: 'white'}));
+        dice.add(point);
+        dice.position.set(0, 300, 0);
+        point.position.set(0, 0, boxWidth / 15);
+
+        // Side with 6 points
+        for (let i = -2 * pointSize; i <= 2 * pointSize; i += 4 * pointSize) {
+            for (let j = -2 * pointSize; j <= 2 * pointSize; j += 2 * pointSize) {
+                let backPoint = point.clone();
+                backPoint.rotation.y = Math.PI;
+                backPoint.position.set(i, j, -diceSize / 1.9);
+                dice.add(backPoint);
+            }
+        }
+
+        // Side with 2 points
+        for (let i = -2 * pointSize; i <= 2 * pointSize; i += 4 * pointSize) {
+            let upperPoint = point.clone();
+            upperPoint.rotation.x = -Math.PI / 2;
+            upperPoint.position.set(i, diceSize / 1.9, i);
+            dice.add(upperPoint);
+        }
+        // Side with 5 points
+        // central point
+        let lowerCentralPoint = point.clone();
+        lowerCentralPoint.rotation.x = Math.PI / 2;
+        lowerCentralPoint.position.set(0, -diceSize / 1.9, 0);
+        dice.add(lowerCentralPoint);
+        // angle points
+        for (let i = -2 * pointSize; i <= 2 * pointSize; i += 4 * pointSize) {
+            for (let j = -2 * pointSize; j <= 2 * pointSize; j += 4 * pointSize) {
+                let lowerPoint = lowerCentralPoint.clone();
+                lowerPoint.position.set(i, -diceSize / 1.9, j);
+                dice.add(lowerPoint);
+            }
+        }
+
+        // Side with 3 points
+        for (let i = -2 * pointSize; i <= 2 * pointSize; i += 2 * pointSize) {
+            let leftPoint = point.clone();
+            leftPoint.rotation.y = -Math.PI / 2;
+            leftPoint.position.set(-diceSize / 1.9, i, i);
+            dice.add(leftPoint);
+        }
+
+        // Side with 4 points
+        for (let i = -2 * pointSize; i <= 2 * pointSize; i += 4 * pointSize) {
+            for (let j = -2 * pointSize; j <= 2 * pointSize; j += 4 * pointSize) {
+                let rightPoint = point.clone();
+                rightPoint.rotation.y = Math.PI / 2;
+                rightPoint.position.set(diceSize / 1.9, i, j);
+                dice.add(rightPoint);
+            }
+        }
+        return dice;
+    }
+</script>
+</body>
+</html>
+
+
