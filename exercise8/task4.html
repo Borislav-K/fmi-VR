@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Анаглифни въртящи се квадрати</title>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/stats.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vaxAnaglyphEffect.js"></script>
+    <script src="../libs/vax.js"></script>
+</head>
+
+<body>
+<script>
+    vaxInitAnaglyph();
+
+    var ring = new THREE.Mesh(new THREE.TorusGeometry(2, 0.2, 2, 4), new THREE.MeshStandardMaterial({color: 'gold'}));
+    scene.add(ring);
+    camera.position.set(0, 0, 5);
+    camera.lookAt(ring.position);
+
+    var rings = [ring];
+    for (let i = 1; i <= 15; i++) {
+        let ringCopy = ring.clone();
+        ringCopy.scale.set((20-i)/15,(20-i)/15,1);
+        ringCopy.translateZ(-5*i);
+        rings.push(ringCopy);
+    }
+    scene.add(...rings);
+
+    // scene.add(new THREE.AxesHelper());
+
+    function animate() {
+        rings.forEach(function (ring, index) {
+            ring.rotation.set(0, 0, t / 2 + index/8);
+        })
+    }
+</script>
+</body>
+</html>
+
+

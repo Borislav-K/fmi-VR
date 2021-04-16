@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>E0804: Материал за дълбочина</title>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/stats.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/OrbitControls.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/scene.js"></script>
+</head>
+
+<body>
+<script>
+    // perspective = false;
+    sceneInit();
+    sceneObjects(); // създава ground и object
+
+    // орбитална навигация
+    var control = new THREE.OrbitControls(camera, renderer.domElement);
+    control.minDistance = 50;		// разстояние
+    control.maxDistance = 500;
+    control.minPolarAngle = 0.1; 	// вертикален ъгъл
+    control.maxPolarAngle = 1.4;
+    control.rotateSpeed = 0.3;		// скорост на въртене
+    control.enableDamping = true;	// с инерция
+    control.dampingFactor = 0.1;
+    control.enablePan = true;		// без плъзгане
+
+    // координати на началната точка на движението
+    var p = new THREE.Vector3(-80, 20 + 80 * Math.random(), -80);
+
+    // координати на крайната точка на движението
+    var q = new THREE.Vector3(80, 20 + 80 * Math.random(), 80);
+
+    ground.material = new THREE.MeshDepthMaterial();
+
+    control.object.zoom = 2;
+    control.object.updateProjectionMatrix();
+
+    // два пилона
+    scene.add(pillar(p, ground.material));
+    scene.add(pillar(q, ground.material));
+
+    object.material = ground.material;
+
+
+    function animate() {
+        // движение по k
+        var k = 0.5 + 0.5 * Math.sin(3 * t);
+        object.position.lerpVectors(p, q, k);
+
+        // въртене на обекта
+        object.rotation.y -= 0.1;
+
+        // движение на гледната точка
+        control.update();
+    }
+</script>
+</body>
+</html>
+
+
