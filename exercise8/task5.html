@@ -11,21 +11,22 @@
     <script src="../libs/StereoEffect.js"></script>
     <script src="../libs/stats.min.js"></script>
     <script src="../libs/WebGL.js"></script>
-    <script src="../libs/vaxAnaglyphEffect.js"></script>
     <script src="../libs/vax.js"></script>
 </head>
 
 <body>
 <script>
     vaxInitParallax();
-    var ring = new THREE.Mesh(new THREE.TorusGeometry(2, 0.2, 2, 4), new THREE.MeshStandardMaterial({color: 'gold'}));
+    var ring = new THREE.Mesh(new THREE.TorusGeometry(3, 0.2, 2, 4), new THREE.MeshLambertMaterial({color: 'gold'}));
     camera.position.set(0, 0, 5);
     camera.lookAt(ring.position);
 
+    light.position.set(0,0,-5);
+
     var rings = [ring];
-    for (let i = 1; i <= 15; i++) {
+    for (let i = 1; i <= 50; i++) {
         let ringCopy = ring.clone();
-        ringCopy.translateZ(-5*i);
+        ringCopy.translateZ(-2*i);
         rings.push(ringCopy);
     }
     scene.add(...rings);
