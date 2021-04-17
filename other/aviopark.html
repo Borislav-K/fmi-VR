@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<html lang="bg">
+<head>
+    <title>Авиопарк</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/StereoEffect.js"></script>
+    <script src="../libs/stats.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/OrbitControls.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="plane.js"></script>
+</head>
+
+<body>
+<script>
+    vaxInitParallax();
+    scene.background = new THREE.Color(0x559BEB);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+    light.position.set(0, 1000, 0);
+    var control = createControls();
+
+    const groundWidthX = 400,
+        groundWidthZ = 1500,
+        grassToCementRatio = 3,
+        planeDistance = groundWidthZ / 6;
+    camera.far = groundWidthZ * 2;
+    camera.position.set(0, 100, groundWidthZ / 1.8);
+    camera.updateProjectionMatrix();
+
+    var groundGeometry = new THREE.BoxGeometry(groundWidthX, 5, groundWidthZ),
+        grassMaterial = new THREE.MeshLambertMaterial({color: 'green'});
+
+    var ground = new THREE.Group(),
+        leftGroundPiece = new THREE.Mesh(groundGeometry, grassMaterial),
+        rightGroundPiece = leftGroundPiece.clone(),
+        middleGroundPiece = new THREE.Mesh(groundGeometry, new THREE.MeshLambertMaterial({color: 'grey'}));
+
+    middleGroundPiece.scale.x = 1 / grassToCementRatio;
+    middleGroundPiece.position.set(groundWidthX / grassToCementRatio, 0.1, 0);
+    rightGroundPiece.translateX(2 * groundWidthX / grassToCementRatio);
+    ground.add(leftGroundPiece, rightGroundPiece, middleGroundPiece);
+    ground.translateX(-groundWidthX / grassToCementRatio);
+    scene.add(ground);
+
+
+    for (let i = 1; i <= 5; i++) {
+        let planeSize = groundWidthZ / 100 * THREE.Math.randFloat(0.5, 1),
+            chosenColour = randomColour(),
+            inverseColour = new THREE.Color(1 - chosenColour.r, 1 - chosenColour.g, 1 - chosenColour.b);
+
+        [buildPlane(planeSize, chosenColour, inverseColour), buildPlane(planeSize, inverseColour, chosenColour)]
+            .forEach(function (plane, isRight) {
+                plane.rotation.set(-Math.PI / 2, 0, isRight ? -Math.PI / 2 : Math.PI / 2);
+                plane.position.set(
+                    isRight ? groundWidthX / 2 : -groundWidthX / 2,
+                    50,
+                    planeDistance * (-3 + i)
+                );
+                scene.add(plane);
+            });
+    }
+
+    function animate() {
+        control.update();
+    }
+
+    function createControls() {
+        var control = new THREE.OrbitControls(camera, renderer.domElement);
+        control.minDistance = 50;		// разстояние
+        control.maxDistance = 1000;
+        control.minPolarAngle = 0.1; 	// вертикален ъгъл
+        control.rotateSpeed = 0.3;		// скорост на въртене
+        control.enableDamping = true;	// с инерция
+        control.dampingFactor = 0.1;
+        control.enablePan = true;		// без плъзгане
+        return control;
+    }
+
+    function randomColour() {
+        return new THREE.Color(THREE.Math.randFloat(0.0, 1), THREE.Math.randFloat(0, 1), THREE.Math.randFloat(0, 1));
+    }
+</script>
+</body>
+</html>
+
+
