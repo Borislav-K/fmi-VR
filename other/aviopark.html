@@ -10,7 +10,6 @@
     <script src="../libs/StereoEffect.js"></script>
     <script src="../libs/stats.min.js"></script>
     <script src="../libs/WebGL.js"></script>
-    <script src="../libs/OrbitControls.js"></script>
     <script src="../libs/vax.js"></script>
     <script src="plane.js"></script>
 </head>
@@ -21,14 +20,13 @@
     scene.background = new THREE.Color(0x559BEB);
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
     light.position.set(0, 1000, 0);
-    var control = createControls();
 
-    const groundWidthX = 400,
-        groundWidthZ = 1500,
+    const groundWidthX = 800,
+        groundWidthZ = 3000,
         grassToCementRatio = 3,
-        planeDistance = groundWidthZ / 6;
-    camera.far = groundWidthZ * 2;
-    camera.position.set(0, 100, groundWidthZ / 1.8);
+        planeDistance = groundWidthZ / 8;
+    camera.far = groundWidthZ;
+    camera.position.set(0, 80, groundWidthZ / 2);
     camera.updateProjectionMatrix();
 
     var groundGeometry = new THREE.BoxGeometry(groundWidthX, 5, groundWidthZ),
@@ -46,9 +44,9 @@
     ground.translateX(-groundWidthX / grassToCementRatio);
     scene.add(ground);
 
-
-    for (let i = 1; i <= 5; i++) {
-        let planeSize = groundWidthZ / 100 * THREE.Math.randFloat(0.5, 1),
+    var planes = [];
+    for (let i = 1; i <= 10; i++) {
+        let planeSize = groundWidthZ / 150 * THREE.Math.randFloat(0.5, 1),
             chosenColour = randomColour(),
             inverseColour = new THREE.Color(1 - chosenColour.r, 1 - chosenColour.g, 1 - chosenColour.b);
 
@@ -56,28 +54,23 @@
             .forEach(function (plane, isRight) {
                 plane.rotation.set(-Math.PI / 2, 0, isRight ? -Math.PI / 2 : Math.PI / 2);
                 plane.position.set(
-                    isRight ? groundWidthX / 2 : -groundWidthX / 2,
-                    50,
-                    planeDistance * (-3 + i)
+                    isRight ? groundWidthX / 3 : -groundWidthX / 3,
+                    85,
+                    planeDistance * (-8 + i)
                 );
-                scene.add(plane);
+                plane.isRight = isRight;
+                planes.push(plane);
             });
     }
+    scene.add(...planes);
 
     function animate() {
-        control.update();
-    }
-
-    function createControls() {
-        var control = new THREE.OrbitControls(camera, renderer.domElement);
-        control.minDistance = 50;		// разстояние
-        control.maxDistance = 1000;
-        control.minPolarAngle = 0.1; 	// вертикален ъгъл
-        control.rotateSpeed = 0.3;		// скорост на въртене
-        control.enableDamping = true;	// с инерция
-        control.dampingFactor = 0.1;
-        control.enablePan = true;		// без плъзгане
-        return control;
+        planes.forEach(function (plane) {
+            plane.translateX(plane.isRight ? 3 : -3);
+            if (plane.position.z >= camera.position.z) {
+                plane.position.z = -groundWidthZ / 2;
+            }
+        })
     }
 
     function randomColour() {
