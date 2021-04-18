@@ -43,6 +43,14 @@
         leftGroundPiece = new THREE.Mesh(groundGeometry, grassMaterial),
         rightGroundPiece = leftGroundPiece.clone(),
         middleGroundPiece = new THREE.Mesh(groundGeometry, roadMaterial),
+        treeBark = new THREE.Mesh(
+            new THREE.CylinderGeometry(1, 1, 10),
+            new THREE.MeshLambertMaterial({color: 'brown'})
+        ),
+        treeCrown = new THREE.Mesh(
+            new THREE.SphereGeometry(5),
+            new THREE.MeshLambertMaterial({color: 'green'}),
+        ),
         options = {
             walk: false
         };
@@ -61,6 +69,7 @@
     scene.add(ground, sky, new THREE.AmbientLight(0xffffff, 0.3));
 
     var planes = [];
+    var trees = [];
     for (let i = 1; i <= 8; i++) {
         let planeSize = groundWidthZ / 150 * THREE.Math.randFloat(0.5, 1),
             chosenColour = randomColour(),
@@ -77,8 +86,16 @@
                 plane.isRight = isRight;
                 planes.push(plane);
             });
+        [buildTree(), buildTree()].forEach(function (tree, isRight) {
+            tree.position.set(
+                isRight ? groundWidthX * 0.7 : -groundWidthX * 0.7,
+                0,
+                planeDistance * (-4 + i)
+            );
+            trees.push(tree);
+        });
     }
-    scene.add(...planes);
+    scene.add(...planes, ...trees);
 
     camera.far = groundWidthZ * 2;
     camera.position.set(0, 300, groundWidthZ * 0.6);
@@ -95,6 +112,12 @@
                     plane.position.z = -groundWidthZ / 2;
                 }
             })
+            trees.forEach(function (tree) {
+                tree.translateZ(3);
+                if (tree.position.z >= camera.position.z) {
+                    tree.position.z = -groundWidthZ / 2;
+                }
+            })
             roadTexture.offset.y = t / 20;
             grassTexture.offset.y = t / 20;
         }
@@ -102,6 +125,18 @@
 
     function randomColour() {
         return new THREE.Color(THREE.Math.randFloat(0.0, 1), THREE.Math.randFloat(0, 1), THREE.Math.randFloat(0, 1));
+    }
+
+    function buildTree() {
+        var tree = new THREE.Group(),
+            bark = treeBark.clone(),
+            crown = treeCrown.clone(),
+            width = THREE.Math.randInt(5, 15),
+            height = THREE.Math.randInt(15, 25);
+        crown.translateY(7);
+        tree.add(bark, crown);
+        tree.scale.set(width, height, width);
+        return tree;
     }
 </script>
 </body>
