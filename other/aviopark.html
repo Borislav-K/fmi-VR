@@ -12,40 +12,56 @@
     <script src="../libs/WebGL.js"></script>
     <script src="../libs/vax.js"></script>
     <script src="plane.js"></script>
+    <script src="../libs/dat.gui.min.js"></script>
 </head>
 
 <body>
 <script>
-    vaxInitParallax();
-    scene.background = new THREE.Color(0x559BEB);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-    light.position.set(0, 1000, 0);
-
-    const groundWidthX = 800,
-        groundWidthZ = 3000,
+    /*
+    Grass texture:
+    https://www.freepik.com/free-photo/green-grass-textures_3987198.htm#page=1&query=grass%20texture&position=1
+    Road texture:
+    https://images.freecreatives.com/wp-content/uploads/2016/01/Road-Texture-with-Tire-Tracks.jpg
+    Sky texture:
+    https://texturify.com/content/9477/Sky-078.jpg
+    */
+    var groundWidthX = 800,
+        groundWidthZ = 2500,
         grassToCementRatio = 3,
-        planeDistance = groundWidthZ / 8;
-    camera.far = groundWidthZ;
-    camera.position.set(0, 80, groundWidthZ / 2);
-    camera.updateProjectionMatrix();
-
-    var groundGeometry = new THREE.BoxGeometry(groundWidthX, 5, groundWidthZ),
-        grassMaterial = new THREE.MeshLambertMaterial({color: 'green'});
-
-    var ground = new THREE.Group(),
+        planeDistance = groundWidthZ / 8,
+        loader = new THREE.TextureLoader(),
+        grassTexture = loader.load('grass-texture.jpg'),
+        roadTexture = loader.load('road-texture.jpg'),
+        skyTexture = loader.load('sky-texture.jpg'),
+        groundGeometry = new THREE.BoxGeometry(groundWidthX, 5, groundWidthZ),
+        grassMaterial = new THREE.MeshBasicMaterial({map: grassTexture}),
+        roadMaterial = new THREE.MeshBasicMaterial({map: roadTexture}),
+        skySphereMaterial = new THREE.MeshBasicMaterial({map: skyTexture, side: THREE.BackSide}),
+        skySphereGeometry = new THREE.SphereGeometry(2600),
+        sky = new THREE.Mesh(skySphereGeometry, skySphereMaterial),
+        ground = new THREE.Group(),
         leftGroundPiece = new THREE.Mesh(groundGeometry, grassMaterial),
         rightGroundPiece = leftGroundPiece.clone(),
-        middleGroundPiece = new THREE.Mesh(groundGeometry, new THREE.MeshLambertMaterial({color: 'grey'}));
+        middleGroundPiece = new THREE.Mesh(groundGeometry, roadMaterial),
+        options = {
+            walk: false
+        };
+
+    grassTexture.wrapT = THREE.RepeatWrapping;
+    roadTexture.wrapT = THREE.RepeatWrapping;
 
     middleGroundPiece.scale.x = 1 / grassToCementRatio;
-    middleGroundPiece.position.set(groundWidthX / grassToCementRatio, 0.1, 0);
+    middleGroundPiece.position.set(groundWidthX / grassToCementRatio, 2, 0);
     rightGroundPiece.translateX(2 * groundWidthX / grassToCementRatio);
     ground.add(leftGroundPiece, rightGroundPiece, middleGroundPiece);
     ground.translateX(-groundWidthX / grassToCementRatio);
-    scene.add(ground);
+
+    vaxInitParallax();
+    light.position.set(0, 1000, 0);
+    scene.add(ground, sky, new THREE.AmbientLight(0xffffff, 0.3));
 
     var planes = [];
-    for (let i = 1; i <= 10; i++) {
+    for (let i = 1; i <= 8; i++) {
         let planeSize = groundWidthZ / 150 * THREE.Math.randFloat(0.5, 1),
             chosenColour = randomColour(),
             inverseColour = new THREE.Color(1 - chosenColour.r, 1 - chosenColour.g, 1 - chosenColour.b);
@@ -56,7 +72,7 @@
                 plane.position.set(
                     isRight ? groundWidthX / 3 : -groundWidthX / 3,
                     85,
-                    planeDistance * (-8 + i)
+                    planeDistance * (-4.5 + i)
                 );
                 plane.isRight = isRight;
                 planes.push(plane);
@@ -64,13 +80,24 @@
     }
     scene.add(...planes);
 
+    camera.far = groundWidthZ * 2;
+    camera.position.set(0, 300, groundWidthZ * 0.6);
+    camera.lookAt(scene.position);
+    camera.updateProjectionMatrix();
+
+    new dat.GUI().add(options, 'walk').name('Разходка');
+
     function animate() {
-        planes.forEach(function (plane) {
-            plane.translateX(plane.isRight ? 3 : -3);
-            if (plane.position.z >= camera.position.z) {
-                plane.position.z = -groundWidthZ / 2;
-            }
-        })
+        if (options.walk) {
+            planes.forEach(function (plane) {
+                plane.translateX(plane.isRight ? 3 : -3);
+                if (plane.position.z >= camera.position.z) {
+                    plane.position.z = -groundWidthZ / 2;
+                }
+            })
+            roadTexture.offset.y = t / 20;
+            grassTexture.offset.y = t / 20;
+        }
     }
 
     function randomColour() {
