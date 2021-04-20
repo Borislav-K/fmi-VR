@@ -52,7 +52,8 @@
             new THREE.MeshLambertMaterial({color: 'green'}),
         ),
         options = {
-            walk: false
+            walk: false,
+            shrink: false,
         };
 
     grassTexture.wrapT = THREE.RepeatWrapping;
@@ -65,6 +66,7 @@
     ground.translateX(-groundWidthX / grassToCementRatio);
 
     vaxInitParallax();
+
     light.position.set(0, 1000, 0);
     scene.add(ground, sky, new THREE.AmbientLight(0xffffff, 0.3));
 
@@ -102,7 +104,21 @@
     camera.lookAt(scene.position);
     camera.updateProjectionMatrix();
 
-    new dat.GUI().add(options, 'walk').name('Разходка');
+    var gui = new dat.GUI();
+
+    gui.add(options, 'walk').name('Разходка');
+    gui.add(options, 'shrink').name('За големи екрани').onChange(function () {
+        if (options.shrink) {
+            window.removeEventListener('resize', onWindowResizeAnaglyph, false);
+            window.addEventListener('resize', resizeWithShrink, false);
+            resizeWithShrink();
+        } else {
+            window.removeEventListener('resize', resizeWithShrink, false);
+            window.addEventListener('resize', onWindowResizeAnaglyph, false);
+            renderer.domElement.style.cssText = 'padding: 0';
+            onWindowResizeAnaglyph();
+        }
+    })
 
     function animate() {
         if (options.walk) {
@@ -137,6 +153,18 @@
         tree.add(bark, crown);
         tree.scale.set(width, height, width);
         return tree;
+    }
+
+    function resizeWithShrink() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        let newWidth = window.innerWidth * 0.86;
+        let newHeight = window.innerHeight * 0.86;
+        renderer.domElement.style.cssText =
+            `padding: ${(window.innerHeight - newHeight) / 2}px ${(window.innerWidth - newWidth) / 2}px`;
+        effect.setSize(newWidth, newHeight, true);
+        //HUAWEI P30 LITE OBSERVATIONS - 6.9cm distance between a point in 2 screen divisions (bad image)
+        //                             - 6cm distance (good image) - approximately 13% less
     }
 </script>
 </body>
