@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title>I will show your location</title>
+    <meta charset="utf-8">
+    <script>
+        function showLocation() {
+            navigator.geolocation.getCurrentPosition(pos => {
+                    window.open(`https://www.openstreetmap.org/?mlat=${pos.coords.latitude}&mlon=${pos.coords.longitude})`);
+                }
+            );
+        }
+    </script>
+</head>
+<body>
+<button onclick="showLocation()">Show my location</button>
+</body>
+</html>
+
+
