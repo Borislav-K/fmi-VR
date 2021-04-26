@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+
+<html lang="bg">
+<head>
+    <title>Виртуален куб</title>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/stats.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/StereoEffect.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/OrbitControls.js"></script>
+</head>
+
+<body>
+<script>
+    //Wood texture: https://www.freepik.com/free-photo/texture-background_1167463.htm#page=1&query=wood%20texture&position=0
+    const cubeSize = 30;
+    var loader = new THREE.TextureLoader(),
+        woodTexture = loader.load('wood-texture.jpg'),
+        cubeGeom = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize),
+        coneGeom = new THREE.ConeGeometry(0.7, 2),
+        cubeMaterial = new THREE.MeshPhongMaterial({map: woodTexture, side: THREE.BackSide}),
+        cube = new THREE.Mesh(cubeGeom, cubeMaterial),
+        rotationX = 0,
+        rotationY = 0,
+        rotationZ = 0;
+    vaxInit();
+    // vaxInitParallax();
+
+    let plh = new THREE.PointLightHelper(light, 10, 0xff0000);
+
+    scene.add(plh);
+    // const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    // controls.target.set(15, 0, 0);
+    // controls.update();
+
+    scene.add(cube);
+    light.position.set(0, cubeSize / 4, 0); // TODO create a lamp
+    camera.position.copy(cube.position);
+
+    spawnCones();
+
+    window.addEventListener('deviceorientation', function (orientation) {
+        rotationX = orientation.beta / 90; // -90 ; 90
+        rotationY = orientation.gamma / 90; // - 90 ; 90
+    });
+
+    function animate() {
+        scene.rotation.set(rotationX, rotationY, rotationZ);
+        // controls.update();
+        // scene.rotation.set(t / 5, t / 2, t / 5);
+        // scene.rotation.set(0, t / 2, 0);
+    }
+
+    function spawnCones() {
+        // the planes z=cubeSize/2 and z=-cubeSize/2
+        for (let x = -cubeSize / 2 + 1; x < cubeSize / 2; x++) {
+            for (let y of randomNumbers(-cubeSize / 2, cubeSize / 2, 10)) {
+                for (let z = -cubeSize / 2; z <= cubeSize / 2; z += cubeSize) {
+                    cube.add(spawnCone(x, y, z));
+                }
+            }
+        }
+
+        // the planes x=cubeSize/2 and x=-cubeSize/2
+        for (let z = -cubeSize / 2 + 1; z < cubeSize / 2; z++) {
+            for (let y of randomNumbers(-cubeSize / 2, cubeSize / 2, 10)) {
+                for (let x = -cubeSize / 2; x <= cubeSize / 2; x += cubeSize) {
+                    cube.add(spawnCone(x, y, z));
+                }
+            }
+        }
+
+    }
+
+    function spawnCone(x, y, z) {
+        var cone = new THREE.Mesh(coneGeom, new THREE.MeshLambertMaterial({
+            color: randomColour()
+        }));
+        cone.position.set(x, y, z);
+        return cone;
+    }
+
+    function randomColour() {
+        return new THREE.Color(THREE.Math.randFloat(0.0, 1), THREE.Math.randFloat(0, 1), THREE.Math.randFloat(0, 1));
+    }
+
+    function randomNumbers(min, max, count) {
+        let nums = [];
+        for (let i = 1; i <= count; i++) {
+            nums.push(THREE.Math.randFloat(min, max));
+        }
+        return nums;
+    }
+
+</script>
+</body>
+</html>
+
