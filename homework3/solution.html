@@ -12,7 +12,8 @@
     <script src="../libs/WebGL.js"></script>
     <script src="../libs/StereoEffect.js"></script>
     <script src="../libs/vax.js"></script>
-    <script src="../libs/OrbitControls.js"></script>
+    <script src="../libs/dat.gui.min.js"></script>
+    <script src="../libs/smallScreenGUI.js"></script>
 </head>
 
 <body>
@@ -28,8 +29,7 @@
         cube = new THREE.Mesh(cubeGeom, cubeMaterial),
         alpha = 90,
         gamma = -90;
-    vaxInit();
-    // vaxInitParallax();
+    vaxInitParallax();
 
     scene.add(cube);
     light.position.set(0, cubeSize / 4, 0); // TODO create a lamp
@@ -54,10 +54,11 @@
     ball4.translateZ(cubeSize / 4);
 
     window.addEventListener('deviceorientation', function (orientation) {
-        console.log(orientation);
         alpha = orientation.alpha;
         gamma = orientation.gamma;
     });
+
+    addSmallScreenOption();
 
     function animate() {
         camera.rotation.x = THREE.Math.degToRad(gamma < 0 ? -90 - gamma : 90 - gamma);
