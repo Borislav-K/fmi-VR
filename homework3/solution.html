@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<html lang="bg">
+<head>
+    <title>Виртуален куб</title>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/stats.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/StereoEffect.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/dat.gui.min.js"></script>
+    <script src="../libs/smallScreenGUI.js"></script>
+</head>
+
+<body>
+<script>
+    // Wood texture:
+    // https://www.freepik.com/free-photo/texture-background_1167463.htm#page=1&query=wood%20texture&position=0
+    const cubeSize = 30;
+    var loader = new THREE.TextureLoader(),
+        woodTexture = loader.load('wood-texture.jpg'),
+        cubeGeom = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize),
+        coneGeom = new THREE.ConeGeometry(0.7, 2),
+        cubeMaterial = new THREE.MeshBasicMaterial({map: woodTexture, side: THREE.BackSide}),
+        cube = new THREE.Mesh(cubeGeom, cubeMaterial),
+        negativeZHalfWatched = true,
+        lastGamma = -90;
+    vaxInitParallax();
+    scene.add(cube);
+    light.position.set(0, cubeSize / 3, 0);
+    camera.position.copy(cube.position);
+    camera.rotation.y = Math.PI / 2;
+
+    spawnCones();
+    var ball = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), new THREE.MeshNormalMaterial());
+    var ball2 = ball.clone();
+    ball2.material = new THREE.MeshLambertMaterial({color: 'red'});
+    var ball3 = ball.clone();
+    ball3.material = new THREE.MeshLambertMaterial({color: 'black'});
+    var ball4 = ball.clone();
+    ball4.material = new THREE.MeshLambertMaterial({color: 'yellow'});
+    var ballTop = ball.clone();
+    ballTop.translateY(cubeSize / 3);
+    cube.add(ball, ball2, ball3, ball4, ballTop);
+    ball.translateX(cubeSize / 3);
+    ball2.translateX(-cubeSize / 3);
+    ball3.translateZ(-cubeSize / 3);
+    ball4.translateZ(cubeSize / 3);
+
+    window.addEventListener('deviceorientation', function (orientation) {
+        camera.rotation.y = THREE.Math.degToRad(Math.abs(orientation.beta) > 160 ?
+            orientation.alpha - 180 :
+            orientation.alpha);
+
+        let gamma = orientation.gamma;
+        if (lastGamma * gamma < 0 && Math.abs(gamma) < 45) {
+            console.log("Changed half!");
+            negativeZHalfWatched = !negativeZHalfWatched;
+        }
+        if (negativeZHalfWatched) {
+            cube.rotation.z = THREE.Math.degToRad(gamma < 0 ? -90 - gamma : 90 - gamma);
+        } else {
+            cube.rotation.z = THREE.Math.degToRad(gamma < 0 ? 90 - gamma : -90 - gamma);
+        }
+        lastGamma = gamma;
+    });
+
+    addSmallScreenOption();
+
+    function spawnCones() {
+        // the planes z=cubeSize/2 and z=-cubeSize/2
+        for (let x = -cubeSize / 2 + 1; x < cubeSize / 2; x++) {
+            for (let y of randomNumbers(-cubeSize / 2, cubeSize / 2, 5)) {
+                for (let z = -cubeSize / 2; z <= cubeSize / 2; z += cubeSize) {
+                    cube.add(spawnCone(x, y, z));
+                }
+            }
+        }
+
+        // the planes x=cubeSize/2 and x=-cubeSize/2
+        for (let z = -cubeSize / 2 + 1; z < cubeSize / 2; z++) {
+            for (let y of randomNumbers(-cubeSize / 2, cubeSize / 2, 5)) {
+                for (let x = -cubeSize / 2; x <= cubeSize / 2; x += cubeSize) {
+                    cube.add(spawnCone(x, y, z));
+                }
+            }
+        }
+
+    }
+
+    function spawnCone(x, y, z) {
+        var cone = new THREE.Mesh(coneGeom, new THREE.MeshLambertMaterial({
+            color: randomColour()
+        }));
+        cone.position.set(x, y, z);
+        return cone;
+    }
+
+    function randomColour() {
+        return new THREE.Color(THREE.Math.randFloat(0.0, 1), THREE.Math.randFloat(0, 1), THREE.Math.randFloat(0, 1));
+    }
+
+    function randomNumbers(min, max, count) {
+        let nums = [];
+        for (let i = 1; i <= count; i++) {
+            nums.push(THREE.Math.randFloat(min, max));
+        }
+        return nums;
+    }
+</script>
+</body>
+</html>
+
