@@ -26,48 +26,25 @@
         cubeGeom = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize),
         coneGeom = new THREE.ConeGeometry(0.7, 2),
         cubeMaterial = new THREE.MeshBasicMaterial({map: woodTexture, side: THREE.BackSide}),
-        cube = new THREE.Mesh(cubeGeom, cubeMaterial),
-        negativeZHalfWatched = true,
-        lastGamma = -90;
+        cube = new THREE.Mesh(cubeGeom, cubeMaterial);
+
     vaxInitParallax();
     scene.add(cube);
     light.position.set(0, cubeSize / 3, 0);
     camera.position.copy(cube.position);
-    camera.rotation.y = Math.PI / 2;
 
     spawnCones();
-    var ball = new THREE.Mesh(new THREE.SphereGeometry(1, 16, 16), new THREE.MeshNormalMaterial());
-    var ball2 = ball.clone();
-    ball2.material = new THREE.MeshLambertMaterial({color: 'red'});
-    var ball3 = ball.clone();
-    ball3.material = new THREE.MeshLambertMaterial({color: 'black'});
-    var ball4 = ball.clone();
-    ball4.material = new THREE.MeshLambertMaterial({color: 'yellow'});
-    var ballTop = ball.clone();
-    ballTop.translateY(cubeSize / 3);
-    cube.add(ball, ball2, ball3, ball4, ballTop);
-    ball.translateX(cubeSize / 3);
-    ball2.translateX(-cubeSize / 3);
-    ball3.translateZ(-cubeSize / 3);
-    ball4.translateZ(cubeSize / 3);
-
     window.addEventListener('deviceorientation', function (orientation) {
-        camera.rotation.y = THREE.Math.degToRad(Math.abs(orientation.beta) > 160 ?
-            orientation.alpha - 180 :
-            orientation.alpha);
-
-        let gamma = orientation.gamma;
-        if (lastGamma * gamma < 0 && Math.abs(gamma) < 45) {
-            console.log("Changed half!");
-            negativeZHalfWatched = !negativeZHalfWatched;
-        }
-        if (negativeZHalfWatched) {
-            cube.rotation.z = THREE.Math.degToRad(gamma < 0 ? -90 - gamma : 90 - gamma);
-        } else {
-            cube.rotation.z = THREE.Math.degToRad(gamma < 0 ? 90 - gamma : -90 - gamma);
-        }
-        lastGamma = gamma;
+        camera.rotation.set(
+            THREE.Math.degToRad(orientation.beta),
+            THREE.Math.degToRad(orientation.alpha),
+            THREE.Math.degToRad(-orientation.gamma),
+            'YXZ'
+        );
+        camera.rotateX(-Math.PI / 2);
+        camera.rotateZ(-Math.PI / 2);
     });
+
 
     addSmallScreenOption();
 
