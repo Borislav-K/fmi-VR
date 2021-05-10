@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title>Front and rear camera</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+</head>
+<body>
+<script>
+    function getFrontCamera() {
+        getVideo({video: {facingMode: {exact: "user"}}});
+    }
+
+    function getBackCamera() {
+        getVideo({video: {facingMode: {exact: "environment"}}});
+    }
+
+    function getVideo(constraint) {
+        let errors = document.getElementById('errors');
+        errors.style.visibility = 'hidden';
+        navigator.mediaDevices.getUserMedia(constraint).then(showVideo).catch((err) => {
+            errors.innerHTML = `Cannot get media with constraints ${JSON.stringify(constraint)}. Reason: ${err}`;
+            errors.style.visibility = 'visible';
+        });
+    }
+
+    function showVideo(stream) {
+        document.getElementById('video').srcObject = stream;
+    }
+
+    function stopCamera() {
+        document.getElementById('video')?.srcObject?.getVideoTracks()?.forEach(track => track.stop());
+    }
+
+</script>
+<button onclick="getFrontCamera()">Front camera</button>
+<button onclick="getBackCamera()">Rear camera</button>
+<button onclick="stopCamera()">Stop camera stream</button>
+<span id="errors" style="background-color: red; color: white; visibility: hidden"></span>
+<hr>
+<video id="video" autoplay></video>
+</body>
+</html>
+
+
