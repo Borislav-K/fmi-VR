@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title>Grayscale selfie</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        canvas {
+            filter: grayscale(1);
+            display: none;
+        }
+
+        button {
+            display: none;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+<script>
+    navigator.mediaDevices.getUserMedia({video: true}).then(stream => {
+        document.querySelector('video').srcObject = stream;
+        document.querySelector('button').style.display = 'block';
+    });
+
+    function getSnapshot() {
+        var video = document.querySelector('video');
+        var settings = video.srcObject.getVideoTracks()[0].getSettings(),
+            snapshot = document.querySelector('canvas');
+
+        snapshot.width = settings.width;
+        snapshot.height = settings.height;
+
+        snapshot.getContext('2d').drawImage(video, 0, 0);
+        snapshot.style.display = 'block';
+    }
+</script>
+<button onclick="getSnapshot()">Selfie</button>
+<video autoplay hidden></video>
+<canvas></canvas>
+</body>
+</html>
+
+
