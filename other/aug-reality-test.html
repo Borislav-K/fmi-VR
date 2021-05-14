@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title>Simple AR test</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+
+    <style>
+        button, video {
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        video {
+            z-index: -100;
+            display: none;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+<button id="button" onclick="getVideo()">Видео</button>
+<video id="video" autoplay></video>
+<script>
+    function getVideo() {
+        navigator.mediaDevices.getUserMedia({video: {facingMode: "environment"}}).then(showVideo);
+    }
+
+    function showVideo(stream) {
+        document.getElementById('video').srcObject = stream;
+        document.getElementById('video').style.display = "block";
+        document.getElementById('button').style.display = "none";
+    }
+
+    // =================== Initialization ======================
+    vaxInit({antialias: true, alpha: true});
+
+    light.position.set(0, 0, 0);
+
+    camera = new THREE.PerspectiveCamera(25, window.innerWidth / window.innerHeight, 400, 3000);
+    camera.position.set(0, 0, 0);
+
+    window.addEventListener('deviceorientation', function (orientation) {
+        camera.rotation.set(
+            THREE.Math.degToRad(orientation.beta),
+            THREE.Math.degToRad(orientation.alpha),
+            THREE.Math.degToRad(-orientation.gamma),
+            'YXZ'
+        );
+        camera.rotateX(-Math.PI / 2);
+        camera.rotateZ(-Math.PI / 2);
+    });
+
+    // =================== Object construction =======================
+    var cubeGeom = new THREE.BoxGeometry(40, 40, 40);
+    var cubes = [];
+    for (let i = 1; i <= 100; i++) {
+        var cube = new THREE.Mesh(cubeGeom, new THREE.MeshLambertMaterial({
+            color: THREE.Math.randInt(0, 0xFFFFFF),
+        }));
+
+        cube.position.set(THREE.Math.randInt(200, 600), THREE.Math.randInt(-150, 150), THREE.Math.randInt(500, 900));
+        cubes.push(cube);
+    }
+    scene.add(...cubes);
+
+    function animate() {
+        cubes.forEach(cube => {
+            cube.rotation.set(0, t, 0);
+        });
+    }
+
+</script>
+</body>
+</html>
+
+
