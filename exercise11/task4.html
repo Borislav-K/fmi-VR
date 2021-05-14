@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title>Alternating textures</title>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+</head>
+
+<body>
+<script>
+    vaxInit();
+    var textureLoader = new THREE.TextureLoader(),
+        materials = [];
+    for (let i = 0; i <= 3; i++) {
+        materials.push(new THREE.MeshLambertMaterial({map: textureLoader.load(`texture${i}.jpg`)}));
+    }
+
+    var geometry = new THREE.BoxBufferGeometry(50, 50, 50),
+        cube = new THREE.Mesh(geometry, materials[0]),
+        textureLastChanged = 0,
+        nextMaterialIndex = 1;
+
+    scene.add(cube);
+
+    function animate() {
+        if (t - textureLastChanged >= 1) {
+            cube.material = materials[nextMaterialIndex];
+            textureLastChanged = t;
+            nextMaterialIndex = (nextMaterialIndex + 1) % 4;
+        }
+        cube.rotation.set(t, t / 2, t / 3);
+    }
+</script>
+
+</body>
+</html>
+
+
