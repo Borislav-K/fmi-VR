@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title>1000 cubes, 1 object</title>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+</head>
+
+<body>
+<script>
+    vaxInit();
+
+    var geometry = new THREE.BoxBufferGeometry(50, 50, 50),
+        texture = new THREE.TextureLoader().load('grid.png'),
+        material = new THREE.MeshLambertMaterial({map: texture}),
+        cube = new THREE.Mesh(geometry, material);
+
+    scene.add(cube);
+
+    function animate() {
+        cube.rotation.set(t, t / 2, t / 3);
+    }
+</script>
+</body>
+</html>
+
+
