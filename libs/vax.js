@@ -1,9 +1,9 @@
 /**
  * FMI VR/AR/XR Library
- * 2020-08-10
- * v 0.008
+ * 2020-08-30
+ * v 0.011
  *
- * vaxInit()	инициализира на моно режим и поддържа
+ * vaxInit(opt)	инициализира на моно режим и поддържа
  *				анимационен цикъл с animate() -- проверява
  *				за наличието на Physijs
  *
@@ -31,25 +31,36 @@
 
 var renderer, scene, camera, light, stats, clock, t, dT, animate, perspective = true;
 
-function vaxInit()
+function vaxInit( rendererOptions = {antialias:true} )
 {
 	if ( !THREE.WEBGL.isWebGLAvailable() )
 		alert( THREE.WEBGL.getWebGLErrorMessage() );
 	
-	renderer = new THREE.WebGLRenderer( {antialias:true} );
+	renderer = new THREE.WebGLRenderer( rendererOptions );
 	document.body.appendChild( renderer.domElement );
 	document.body.style.margin = 0;
 	document.body.style.overflow = 'hidden';
 	
-	stats = new Stats();
-	document.body.appendChild( stats.dom );
-
+	if( typeof Stats !== 'undefined' )
+	{
+		stats = new Stats();
+		document.body.appendChild( stats.dom );
+	}
+	
 	if( typeof Physijs !== 'undefined' )
 		scene = new Physijs.Scene();
 	else
 		scene = new THREE.Scene();
-	scene.background = new THREE.Color('white');
-
+	
+	if( rendererOptions.alpha )
+	{
+		renderer.setClearColor( 0, 0 );
+	}
+	else
+	{
+		scene.background = new THREE.Color('white');
+	}
+	
 	clock = new THREE.Clock(true);
 
 	if(	perspective )
@@ -79,9 +90,12 @@ function vaxInitAnaglyph( eyeSep = 1 )
 	document.body.style.margin = 0;
 	document.body.style.overflow = 'hidden';
 	
-	stats = new Stats();
-	document.body.appendChild( stats.dom );
-
+	if( typeof Stats !== 'undefined' )
+	{
+		stats = new Stats();
+		document.body.appendChild( stats.dom );
+	}
+	
 	if( typeof Physijs !== 'undefined' )
 		scene = new Physijs.Scene();
 	else
@@ -121,9 +135,12 @@ function vaxInitParallax( eyeSep = 1 )
 	document.body.style.margin = 0;
 	document.body.style.overflow = 'hidden';
 	
-	stats = new Stats();
-	document.body.appendChild( stats.dom );
-
+	if( typeof Stats !== 'undefined' )
+	{
+		stats = new Stats();
+		document.body.appendChild( stats.dom );
+	}
+	
 	if( typeof Physijs !== 'undefined' )
 		scene = new Physijs.Scene();
 	else
@@ -177,7 +194,7 @@ function frame( )
 
 	if (animate) animate();
 	
-	stats.update();
+	if (stats) stats.update();
 	
 	renderer.render( scene, camera );
 }
@@ -189,7 +206,7 @@ function frameAnaglyph( )
 
 	if (animate) animate();
 	
-	stats.update();
+	if (stats) stats.update();
 	
 	effect.render( scene, camera );
 }
