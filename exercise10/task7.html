@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title>Command me with your head</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <style>
+        video {
+            position: absolute;
+            z-index: -10;
+        }
+    </style>
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/tracking-min.js"></script>
+    <script src="../libs/face-min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            navigator.mediaDevices.getUserMedia({video: {facingMode: {exact: "user"}}}).then(stream => {
+                document.getElementById('video').srcObject = stream;
+            });
+
+            vaxInit();
+
+            const object = new THREE.Mesh(new THREE.BoxGeometry(40, 80, 5), new THREE.MeshPhongMaterial({color: 'hotpink'}));
+            object.translateY(10);
+            camera.lookAt(new THREE.Vector3(0, 0, -1));
+            scene.add(object);
+
+            var faces = new tracking.ObjectTracker(['face']);
+            faces.on('track', event => {
+                if (event.data.length > 0) {
+                    // Use the first face only
+                    let x = event.data[0].x;
+                    let y = event.data[0].y;
+                    object.position.set(
+                        60 - 120 * x / video.clientWidth,
+                        20 - 40 * y / video.clientHeight,
+                        0
+                    );
+                }
+            });
+
+            tracking.track('#video', faces);
+        });
+    </script>
+</head>
+<body>
+<video id="video" autoplay></video>
+</body>
+</html>
+
+
