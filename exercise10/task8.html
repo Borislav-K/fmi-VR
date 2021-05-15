@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title>Video face recognition</title>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/tracking-min.js"></script>
+    <script src="../libs/face-min.js"></script>
+
+    <style>
+        .rectangle {
+            background-color: red;
+            position: absolute;
+            opacity: 0.3;
+        }
+
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body onload="detectFaces()">
+<div id="video-container">
+    <div id="video-overlays"></div>
+    <video id="video" src="party.mp4" preload autoplay loop muted></video>
+</div>
+
+<script>
+    function detectFaces() {
+        var objects = new tracking.ObjectTracker(['face']);
+        objects.on('track', event => {
+            erasePreviousRectangles();
+            event.data.forEach(rect => {
+                drawRectangleOnVideo(rect.x, rect.y, rect.width, rect.height);
+            })
+        });
+
+        tracking.track('#video', objects);
+    }
+
+    function drawRectangleOnVideo(x, y, width, height) {
+        let rect = document.createElement('div');
+        rect.classList.add('rectangle');
+
+        rect.style.width = `${width}px`;
+        rect.style.height = `${height}px`;
+        rect.style.left = `${x}px`;
+        rect.style.top = `${y}px`;
+
+        document.getElementById('video-container').appendChild(rect);
+    }
+
+    function erasePreviousRectangles() {
+        document.querySelectorAll('.rectangle').forEach(node => {
+            node.parentNode.removeChild(node);
+        });
+    }
+</script>
+</body>
+</html>
+
+
