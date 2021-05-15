@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <title>Пеперудче</title>
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/stats.min.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/WebGL.js"></script>
+</head>
+<body>
+<script>
+    vaxInit();
+
+    const cubeGeometry = new THREE.BoxGeometry();
+
+    const purpleMaterial = new THREE.MeshLambertMaterial({color: new THREE.Color(0x8d0dee)});
+    const pinkMaterial = new THREE.MeshLambertMaterial({color: new THREE.Color(0xd50eed)});
+    const yellowMaterial = new THREE.MeshLambertMaterial({color: new THREE.Color(0xe8ed0e)});
+
+    //Floor
+    var floor = new THREE.Mesh(cubeGeometry, new THREE.MeshLambertMaterial({color: 'green'}));
+    floor.scale.set(20, 1, 20);
+
+    var butterflies = [];
+    for (let i = 1; i <= 10; i++) {
+        let butterfly = createButterfly();
+        butterfly.scale.set(0.5, 0.5, 0.5);
+        butterfly.position.y = 6;
+
+        butterflies.push(butterfly);
+    }
+
+    scene.add(floor, ...butterflies);
+
+    var light2 = light.clone();
+    light2.position.z = -300;
+    scene.add(light2);
+
+    camera.position.set(0, 15, 20);
+    camera.lookAt(floor.position);
+
+    function animate() {
+        scene.rotation.set(0, t/2, 0);
+        butterflies.forEach(function (butterfly, index) {
+            butterfly.position.set(
+                index * Math.pow(-1, index) + Math.sin(t * index / 5),
+                8 + index * Math.pow(-1/4, index) + Math.sin(5 * t),
+                -8 + index * 1.75
+            );
+            butterfly.wings.forEach(function (wing) {
+                wing.rotation.z = Math.sin(10 * t) / 3 + Math.PI / 6;
+            });
+        });
+    }
+
+    function createButterfly() {
+        var butterfly = new THREE.Group();
+        butterfly.wings = createWings();
+        butterfly.add(createStomach(), ...createAntennas(), ...butterfly.wings, ...createEyes(), createSmile());
+        return butterfly;
+    }
+
+
+    function createStomach() {
+        let stomach = new THREE.Group();
+        let stomachPartsCount = 64;
+        for (let i = 1; i <= stomachPartsCount; i++) {
+            let stomachPart = new THREE.Mesh(cubeGeometry, i % 2 === 0 ? purpleMaterial : pinkMaterial);
+            let partSize = Math.max(i, stomachPartsCount - i);
+            stomachPart.scale.set(partSize, 1, partSize);
+            stomachPart.position.set(0, i / 2 - 6, 0);
+            stomach.add(stomachPart);
+        }
+        stomach.scale.set(1.5 / stomachPartsCount, 8 / stomachPartsCount, 1.5 / stomachPartsCount);
+        return stomach;
+    }
+
+    function createAntennas() {
+        //Antennas
+        let leftAntenna = new THREE.Mesh(new THREE.TorusGeometry(3, 0.02, 16, 16, Math.PI / 4), yellowMaterial);
+        leftAntenna.position.set(-3, 3, 0);
+
+        let rightAntenna = leftAntenna.clone();
+        rightAntenna.rotation.y = Math.PI;
+        rightAntenna.position.x = 3;
+
+        //Antennas' tops
+        let leftAntennaTop = new THREE.Mesh(cubeGeometry, yellowMaterial);
+        leftAntennaTop.position.set(-0.8, 5, 0);
+        leftAntennaTop.rotation.z = Math.PI / 4;
+        leftAntennaTop.scale.set(0.3, 0.3, 0.3);
+
+        let rightAntennaTop = leftAntennaTop.clone();
+        rightAntennaTop.position.x = 0.8;
+
+        return [leftAntennaTop, rightAntennaTop, leftAntenna, rightAntenna];
+    }
+
+    function createWings() {
+        let leftWing = new THREE.Group();
+
+        let leftWingUpperPart = new THREE.Mesh(cubeGeometry, pinkMaterial);
+        leftWingUpperPart.scale.set(2, 5, 1);
+
+        let leftWingLowerFarPart = new THREE.Mesh(cubeGeometry, pinkMaterial);
+        leftWingLowerFarPart.scale.set(1, 2, 1);
+        leftWingLowerFarPart.position.set(-1.5, -1.5, 0);
+
+        let leftWingLowerClosePart = new THREE.Mesh(cubeGeometry, pinkMaterial);
+        leftWingLowerClosePart.position.set(-0.70, -0.15, 0);
+        leftWingLowerClosePart.rotation.set(Math.PI / 2, Math.PI / 3, 0);
+        leftWingLowerClosePart.scale.set(1.9, 1, 1.9);
+
+        leftWing.add(leftWingUpperPart, leftWingLowerFarPart, leftWingLowerClosePart);
+        leftWing.position.set(-1.5, 2, 0);
+        leftWing.rotation.set(0, 0, Math.PI / 6);
+        leftWing.scale.set(1, 1, 0.1);
+
+        let rightWing = leftWing.clone();
+        rightWing.position.x = 1.5;
+        rightWing.rotation.y = Math.PI;
+
+        return [leftWing, rightWing];
+    }
+
+    function createEyes() {
+        let leftEye = new THREE.Mesh(cubeGeometry, yellowMaterial);
+        leftEye.scale.set(0.2, 0.2, 0.2);
+        leftEye.position.set(-0.25, 2.75, 0.6);
+        leftEye.rotation.z = Math.PI / 4;
+
+        rightEye = leftEye.clone();
+        rightEye.position.x = 0.25;
+        return [leftEye, rightEye];
+    }
+
+    function createSmile() {
+        let smile = new THREE.Group();
+
+        let smilePartsCount = 12;
+        for (let i = 1; i <= smilePartsCount; i++) {
+            let smilePart = new THREE.Mesh(cubeGeometry, yellowMaterial);
+            smilePart.scale.set(0.2, 0.1, 0.2);
+            smilePart.position.set(
+                -0.3 + i * 0.6 / smilePartsCount,
+                2 + Math.max(smilePartsCount - i, i) / 30,
+                0.55);
+            smile.add(smilePart);
+        }
+        return smile;
+    }
+</script>
+</body>
+</html>
