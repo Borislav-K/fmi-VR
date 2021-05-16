@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title>Simple AR test</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+</head>
+
+<body>
+<script>
+    vaxInit({antialias: true, alpha: true});
+    camera = new THREE.PerspectiveCamera(25, window.innerWidth / window.innerHeight, 400, 3000);
+
+    scene.background = new THREE.CubeTextureLoader()
+        .setPath('parkTexturePack/')
+        .load(['posx.jpg', 'negx.jpg',
+            'posy.jpg', 'negy.jpg',
+            'posz.jpg', 'negz.jpg']);
+
+    window.addEventListener('deviceorientation', function (orientation) {
+        camera.rotation.set(
+            THREE.Math.degToRad(orientation.beta),
+            THREE.Math.degToRad(orientation.alpha),
+            THREE.Math.degToRad(-orientation.gamma),
+            'YXZ'
+        );
+        camera.rotateX(-Math.PI / 2);
+        camera.rotateZ(-Math.PI / 2);
+    });
+
+    let crystalGeom = new THREE.DodecahedronGeometry(80);
+    let crystalMaterial = new THREE.MeshPhongMaterial({color: 'red'});
+    let crystals = [];
+    for (let i = 1; i <= 100; i++) {
+        let crystal = new THREE.Mesh(crystalGeom, crystalMaterial);
+        crystal.position.setFromSphericalCoords(
+            THREE.Math.randInt(1500, 2500),
+            THREE.Math.randFloat(Math.PI / 8, Math.PI / 1.5),
+            THREE.Math.randFloat(0, 2 * Math.PI)
+        );
+        crystals.push(crystal);
+    }
+    scene.add(...crystals);
+
+    function animate() {
+        crystals.forEach(crystal => {
+            crystal.rotation.y = t;
+        })
+    }
+
+</script>
+</body>
+</html>
+
+
