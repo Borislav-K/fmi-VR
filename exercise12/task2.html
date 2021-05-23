@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title>Skeleton with spine, neck, head and arms</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+</head>
+<body>
+<script>
+    vaxInit();
+    var pelvis = new THREE.Bone();
+
+    // leg 1
+    var legA1 = new THREE.Bone(),
+        legB1 = new THREE.Bone(),
+        legC1 = new THREE.Bone(),
+        legD1 = new THREE.Bone(); // artificial bone (only used to control legC1's length)
+
+    // leg 2
+    var legA2 = new THREE.Bone(),
+        legB2 = new THREE.Bone(),
+        legC2 = new THREE.Bone(),
+        legD2 = new THREE.Bone(); // artificial bone (only used to control legC2's length)
+
+    // back
+    var backA = new THREE.Bone(),
+        backB = new THREE.Bone(),
+        backC = new THREE.Bone(),
+        backD = new THREE.Bone(); // artificial bone (only used to control backC's length)
+
+    // neck, head
+    var neck = new THREE.Bone(),
+        head = new THREE.Bone();
+
+    // arm 1
+    var armA1 = new THREE.Bone(),
+        armB1 = new THREE.Bone(),
+        armC1 = new THREE.Bone(),
+        armD1 = new THREE.Bone(); // artificial bone (only used to control armC1's length)
+
+    // arm 2
+    var armA2 = new THREE.Bone(),
+        armB2 = new THREE.Bone(),
+        armC2 = new THREE.Bone(),
+        armD2 = new THREE.Bone(); // artificial bone (only used to control armC2's length)
+
+    pelvis.add(legA1, legA2, backA);
+
+    legA1.add(legB1);
+    legB1.add(legC1);
+    legC1.add(legD1);
+
+    legA2.add(legB2);
+    legB2.add(legC2);
+    legC2.add(legD2);
+
+    armA1.add(armB1);
+    armB1.add(armC1);
+    armC1.add(armD1);
+
+    armA2.add(armB2);
+    armB2.add(armC2);
+    armC2.add(armD2);
+
+    backA.add(backB);
+    backB.add(backC);
+    backC.add(backD);
+    backD.add(neck, armA1, armA1, armA2);
+    neck.add(head);
+
+    pelvis.position.y = 20;
+
+    legA1.position.y = -2;
+    legA1.position.z = 5;
+    legB1.position.y = 20;
+    legC1.position.y = 15;
+    legD1.position.y = 5;
+
+    legA2.position.y = -2;
+    legA2.position.z = -5;
+    legB2.position.y = 20;
+    legC2.position.y = 15;
+    legD2.position.y = 5;
+
+    backA.position.y = 5;
+    backB.position.y = 7;
+    backC.position.y = 9;
+    backD.position.y = 5;
+    neck.position.y = 1.5;
+    head.position.y = 4;
+
+    backA.rotation.z = Math.PI / 12;
+    backB.rotation.z = -Math.PI / 12;
+    backC.rotation.z = -Math.PI / 12;
+    backD.rotation.z = Math.PI / 12 + Math.PI / 36;
+    neck.rotation.z = -Math.PI / 36;
+
+    armA1.position.y = -1;
+    armA1.position.z = 4;
+    armB1.position.y = -10;
+    armC1.position.y = -12;
+    armD1.position.y = -5;
+
+    armA2.position.y = -1;
+    armA2.position.z = -4;
+    armB2.position.y = -10;
+    armC2.position.y = -12;
+    armD2.position.y = -5;
+
+    scene.add(new THREE.SkeletonHelper(pelvis), pelvis);
+
+    function animate() {
+        legA1.rotation.z = THREE.Math.degToRad(210 + 30 * Math.sin(4 * t));
+        legB1.rotation.z = THREE.Math.degToRad(-60 - 60 * Math.sin(4 * t));
+        legC1.rotation.z = THREE.Math.degToRad(90);
+
+        legA2.rotation.z = THREE.Math.degToRad(210 - 30 * Math.sin(4 * t));
+        legB2.rotation.z = THREE.Math.degToRad(-60 + 60 * Math.sin(4 * t));
+        legC2.rotation.z = THREE.Math.degToRad(90);
+
+        scene.rotation.y = t;
+    }
+</script>
+</body>
+</html>
+
+
