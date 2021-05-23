@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <title>Running sphere-man</title>
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="../libs/three.min.js"></script>
+    <script src="../libs/WebGL.js"></script>
+    <script src="../libs/vax.js"></script>
+    <script src="../libs/dat.gui.min.js"></script>
+</head>
+
+<body>
+<script>
+    vaxInit();
+    var data = {
+        speed: 4,
+        goSlow: () => {
+            data.speed = 2;
+        },
+        goMedium: () => {
+            data.speed = 5;
+        },
+        goFast: () => {
+            data.speed = 10;
+        }
+    }
+    initGUI();
+
+    var floor = new THREE.Mesh(new THREE.BoxGeometry(300, 1, 300), new THREE.MeshNormalMaterial());
+    floor.position.set(0, -40, 0);
+    scene.add(floor);
+    camera.position.set(0, 50, 300);
+
+    var pelvis = new THREE.Bone();
+
+    // leg 1
+    var legA1 = new THREE.Bone(),
+        legB1 = new THREE.Bone(),
+        legC1 = new THREE.Bone(),
+        legD1 = new THREE.Bone(); // artificial bone (only used to control legC1's length)
+
+    // leg 2
+    var legA2 = new THREE.Bone(),
+        legB2 = new THREE.Bone(),
+        legC2 = new THREE.Bone(),
+        legD2 = new THREE.Bone(); // artificial bone (only used to control legC2's length)
+
+    // back
+    var backA = new THREE.Bone(),
+        backB = new THREE.Bone(),
+        backC = new THREE.Bone(),
+        backD = new THREE.Bone(); // artificial bone (only used to control backC's length)
+
+    // neck, head
+    var neck = new THREE.Bone(),
+        head = new THREE.Bone();
+
+    // arm 1
+    var armA1 = new THREE.Bone(),
+        armB1 = new THREE.Bone(),
+        armC1 = new THREE.Bone(),
+        armD1 = new THREE.Bone(); // artificial bone (only used to control armC1's length)
+
+    // arm 2
+    var armA2 = new THREE.Bone(),
+        armB2 = new THREE.Bone(),
+        armC2 = new THREE.Bone(),
+        armD2 = new THREE.Bone(); // artificial bone (only used to control armC2's length)
+
+    pelvis.add(legA1, legA2, backA);
+
+    legA1.add(legB1);
+    legB1.add(legC1);
+    legC1.add(legD1);
+
+    legA2.add(legB2);
+    legB2.add(legC2);
+    legC2.add(legD2);
+
+    armA1.add(armB1);
+    armB1.add(armC1);
+    armC1.add(armD1);
+
+    armA2.add(armB2);
+    armB2.add(armC2);
+    armC2.add(armD2);
+
+    backA.add(backB);
+    backB.add(backC);
+    backC.add(backD);
+    backD.add(neck, armA1, armA1, armA2);
+    neck.add(head);
+
+    legA1.position.y = -2;
+    legA1.position.z = -5;
+    legB1.position.y = -20;
+    legC1.position.y = -15;
+    legD1.position.y = -5;
+
+    legA2.position.y = -2;
+    legA2.position.z = 5;
+    legB2.position.y = -20;
+    legC2.position.y = -15;
+    legD2.position.y = -5;
+
+    backA.position.y = 5;
+    backB.position.y = 7;
+    backC.position.y = 9;
+    backD.position.y = 5;
+    neck.position.y = 1.5;
+    head.position.y = 4;
+
+    backA.rotation.z = Math.PI / 12;
+    backB.rotation.z = -Math.PI / 12;
+    backC.rotation.z = -Math.PI / 12;
+    backD.rotation.z = Math.PI / 12 + Math.PI / 36;
+    neck.rotation.z = -Math.PI / 36;
+
+    armA1.position.y = -1;
+    armA1.position.z = 4;
+    armB1.position.y = -10;
+    armC1.position.y = -12;
+    armD1.position.y = -5;
+
+    armA2.position.y = -1;
+    armA2.position.z = -4;
+    armB2.position.y = -10;
+    armC2.position.y = -12;
+    armD2.position.y = -5;
+
+    // elbows angles
+    armB1.rotation.z = Math.PI / 4;
+    armB2.rotation.z = Math.PI / 4;
+
+    // wrists angles
+    armC1.rotation.z = Math.PI / 12;
+    armC2.rotation.z = Math.PI / 12;
+
+    // ankles angles :)
+    legC1.rotation.z = Math.PI / 2;
+    legC2.rotation.z = Math.PI / 2;
+
+
+    var skeleton = new THREE.Skeleton([pelvis, backA, backB, backC, backD, neck, head,
+        legA1, legB1, legC1, legD1, legA2, legB2, legC2, legD2,
+        armA1, armB1, armC1, armD1, armA1, armB2, armC2, armD2]);
+
+    scene.add(new THREE.SkeletonHelper(pelvis), pelvis);
+
+    var material = new THREE.MeshPhongMaterial({color: 'skyblue', skinning: true}),
+        leg1Mesh = skinLeg([legA1, legB1, legC1, legD1, pelvis]),
+        leg2Mesh = skinLeg([legA2, legB2, legC2, legD2, pelvis]),
+        arm1Mesh = skinArm([armA1, armB1, armC1, armD1]),
+        arm2Mesh = skinArm([armA2, armB2, armC2, armD2]),
+        backMesh = skinBody([backA, backB, backC, neck, pelvis]);
+    scene.add(leg1Mesh, leg2Mesh, arm1Mesh, arm2Mesh, backMesh);
+
+    function animate() {
+        var phi = Math.sin(data.speed * t);
+        armA1.rotation.z = -Math.PI / 12 + phi;
+        armA2.rotation.z = -Math.PI / 12 - phi;
+
+        legA1.rotation.z = phi * 0.8;
+        legA2.rotation.z = -phi * 0.8;
+        legB1.rotation.z = -phi * 0.6;
+        legB2.rotation.z = phi * 0.6;
+
+        pelvis.rotation.y += data.speed * 0.003;
+        pelvis.position.setFromSphericalCoords(100, Math.PI / 2, pelvis.rotation.y);
+        pelvis.position.y = 5 * Math.sin(data.speed*2 * t);
+    }
+
+    function skinLeg(bones) {
+        var skeleton = new THREE.Skeleton(bones),
+            geometry = new THREE.SphereBufferGeometry(4, 64, 64),
+            pos = geometry.getAttribute('position'),
+            skinIndices = [],
+            skinWeights = [],
+            k = 1;
+
+        for (let i = 0; i < pos.count; i++) {
+            let y = pos.getY(i);
+            if (y <= -3) {
+                k = THREE.Math.mapLinear(y, -20, -3, 0, 1);
+                skinIndices.push(2, 1, 0, 0);
+            } else if (y <= -1) {
+                k = THREE.Math.mapLinear(y, -3.5, -1, 1, 0);
+                skinIndices.push(2, 1, 0, 0);
+            } else if (y < 1) {
+                k = THREE.Math.mapLinear(k, 1, -1, 0, 1);
+                skinIndices.push(1, 0, 0, 0);
+            } else {
+                k = THREE.Math.mapLinear(k, 1, 4, 0, 0.05);
+                skinIndices.push(0, 4, 0, 0);
+            }
+            skinWeights.push(k, 1 - k, 0, 0);
+        }
+
+        geometry.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(skinIndices, 4));
+        geometry.setAttribute('skinWeight', new THREE.Float32BufferAttribute(skinWeights, 4));
+
+        var mesh = new THREE.SkinnedMesh(geometry, material);
+        mesh.add(bones[3]);
+        mesh.bind(skeleton);
+        return mesh;
+    }
+
+    function skinArm(bones) {
+        var skeleton = new THREE.Skeleton(bones),
+            geometry = new THREE.SphereBufferGeometry(3, 64, 64),
+            pos = geometry.getAttribute('position'),
+            skinIndices = [],
+            skinWeights = [];
+
+        for (let i = 0; i < pos.count; i++) {
+            let y = pos.getY(i);
+            let k = THREE.Math.mapLinear(y, 5, -5, 0, 1);
+            skinIndices.push(0, 2, 0, 0);
+            skinWeights.push(1 - k, k, 0, 0);
+        }
+
+        geometry.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(skinIndices, 4));
+        geometry.setAttribute('skinWeight', new THREE.Float32BufferAttribute(skinWeights, 4));
+
+        var mesh = new THREE.SkinnedMesh(geometry, material);
+        mesh.add(bones[3]);
+        mesh.bind(skeleton);
+        return mesh;
+    }
+
+    function skinBody(bones) {
+        var skeleton = new THREE.Skeleton(bones),
+            geometry = new THREE.SphereBufferGeometry(5, 12, 32),
+            pos = geometry.getAttribute('position'),
+            skinIndices = [],
+            skinWeights = [],
+            k = 1;
+        geometry.scale(1, 1.5, 1);
+
+        for (let i = 0; i < pos.count; i++) {
+            var y = pos.getY(i);
+            if (Math.abs(y) < 1) {
+                k = THREE.Math.mapLinear(y, 1, -1, 0, 1);
+                skinIndices.push(1, 2, 0, 0);
+            } else if (y > 0) {
+                k = THREE.Math.mapLinear(y, 5, 0, 0, 1);
+                skinIndices.push(2, 3, 0, 0);
+            } else {
+                k = THREE.Math.mapLinear(y, -5, 0, 1, 0);
+                skinIndices.push(0, 1, 0, 0);
+            }
+            skinWeights.push(k, 1 - k, 0, 0);
+        }
+
+        geometry.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(skinIndices, 4));
+        geometry.setAttribute('skinWeight', new THREE.Float32BufferAttribute(skinWeights, 4));
+
+        var mesh = new THREE.SkinnedMesh(geometry, material);
+        mesh.add(head);
+        mesh.bind(skeleton);
+        return mesh;
+    }
+
+    function initGUI() {
+        var gui = new dat.GUI();
+        gui.domElement.style.marginRight = 0;
+        gui.add(data, 'goSlow');
+        gui.add(data, 'goMedium');
+        gui.add(data, 'goFast');
+    }
+</script>
+</body>
+</html>
+
+
