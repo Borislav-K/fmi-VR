@@ -30,7 +30,7 @@
     }
     initGUI();
 
-    var floor = new THREE.Mesh(new THREE.BoxGeometry(300, 1, 300), new THREE.MeshNormalMaterial());
+    var floor = new THREE.Mesh(new THREE.BoxGeometry(500, 1, 500), new THREE.MeshNormalMaterial());
     floor.position.set(0, -40, 0);
     scene.add(floor);
     camera.position.set(0, 50, 300);
@@ -149,15 +149,18 @@
         legA1, legB1, legC1, legD1, legA2, legB2, legC2, legD2,
         armA1, armB1, armC1, armD1, armA1, armB2, armC2, armD2]);
 
-    scene.add(new THREE.SkeletonHelper(pelvis), pelvis);
-
-    var material = new THREE.MeshPhongMaterial({color: 'skyblue', skinning: true}),
+    var material = new THREE.MeshPhongMaterial({
+            color: 'skyblue',
+            skinning: true,
+            morphTargets: true,
+            morphNormals: true
+        }),
         leg1Mesh = skinLeg([legA1, legB1, legC1, legD1, pelvis]),
         leg2Mesh = skinLeg([legA2, legB2, legC2, legD2, pelvis]),
         arm1Mesh = skinArm([armA1, armB1, armC1, armD1]),
         arm2Mesh = skinArm([armA2, armB2, armC2, armD2]),
         backMesh = skinBody([backA, backB, backC, neck, pelvis]);
-    scene.add(leg1Mesh, leg2Mesh, arm1Mesh, arm2Mesh, backMesh);
+    scene.add(pelvis, leg1Mesh, leg2Mesh, arm1Mesh, arm2Mesh, backMesh);
 
     function animate() {
         var phi = Math.sin(data.speed * t);
@@ -171,7 +174,11 @@
 
         pelvis.rotation.y += data.speed * 0.003;
         pelvis.position.setFromSphericalCoords(100, Math.PI / 2, pelvis.rotation.y);
-        pelvis.position.y = 5 * Math.sin(data.speed*2 * t);
+        pelvis.position.y = 5 * Math.sin(data.speed * 2 * t);
+
+        [leg1Mesh, leg2Mesh, arm1Mesh, arm2Mesh, backMesh].forEach(mesh => {
+            mesh.morphTargetInfluences[0] = Math.abs(Math.sin(data.speed * t));
+        })
     }
 
     function skinLeg(bones) {
@@ -180,6 +187,7 @@
             pos = geometry.getAttribute('position'),
             skinIndices = [],
             skinWeights = [],
+            stretchedMorphTargetCoords = [],
             k = 1;
 
         for (let i = 0; i < pos.count; i++) {
@@ -198,10 +206,16 @@
                 skinIndices.push(0, 4, 0, 0);
             }
             skinWeights.push(k, 1 - k, 0, 0);
+
+            stretchedMorphTargetCoords.push(pos.getX(i) * 1.2, y * 3, pos.getZ(i) * 1.2);
         }
 
         geometry.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(skinIndices, 4));
         geometry.setAttribute('skinWeight', new THREE.Float32BufferAttribute(skinWeights, 4));
+
+        stretchedMorphTargetCoords = new THREE.Float32BufferAttribute(stretchedMorphTargetCoords, 3);
+        geometry.morphAttributes.position = [stretchedMorphTargetCoords];
+        geometry.morphAttributes.normals = [stretchedMorphTargetCoords];
 
         var mesh = new THREE.SkinnedMesh(geometry, material);
         mesh.add(bones[3]);
@@ -214,17 +228,24 @@
             geometry = new THREE.SphereBufferGeometry(3, 64, 64),
             pos = geometry.getAttribute('position'),
             skinIndices = [],
-            skinWeights = [];
+            skinWeights = [],
+            stretchedMorphTargetCoords = [];
 
         for (let i = 0; i < pos.count; i++) {
             let y = pos.getY(i);
             let k = THREE.Math.mapLinear(y, 5, -5, 0, 1);
             skinIndices.push(0, 2, 0, 0);
             skinWeights.push(1 - k, k, 0, 0);
+
+            stretchedMorphTargetCoords.push(pos.getX(i) * 1.5, y * 3, pos.getZ(i) * 1.5);
         }
 
         geometry.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(skinIndices, 4));
         geometry.setAttribute('skinWeight', new THREE.Float32BufferAttribute(skinWeights, 4));
+
+        stretchedMorphTargetCoords = new THREE.Float32BufferAttribute(stretchedMorphTargetCoords, 3);
+        geometry.morphAttributes.position = [stretchedMorphTargetCoords];
+        geometry.morphAttributes.normals = [stretchedMorphTargetCoords];
 
         var mesh = new THREE.SkinnedMesh(geometry, material);
         mesh.add(bones[3]);
@@ -238,6 +259,7 @@
             pos = geometry.getAttribute('position'),
             skinIndices = [],
             skinWeights = [],
+            stretchedMorphTargetCoords = [],
             k = 1;
         geometry.scale(1, 1.5, 1);
 
@@ -254,10 +276,15 @@
                 skinIndices.push(0, 1, 0, 0);
             }
             skinWeights.push(k, 1 - k, 0, 0);
+            stretchedMorphTargetCoords.push(pos.getX(i) * 1.5, y * 1.5, pos.getZ(i));
         }
 
         geometry.setAttribute('skinIndex', new THREE.Uint16BufferAttribute(skinIndices, 4));
         geometry.setAttribute('skinWeight', new THREE.Float32BufferAttribute(skinWeights, 4));
+
+        stretchedMorphTargetCoords = new THREE.Float32BufferAttribute(stretchedMorphTargetCoords, 3);
+        geometry.morphAttributes.position = [stretchedMorphTargetCoords];
+        geometry.morphAttributes.normals = [stretchedMorphTargetCoords];
 
         var mesh = new THREE.SkinnedMesh(geometry, material);
         mesh.add(head);
